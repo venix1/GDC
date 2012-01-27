@@ -54,11 +54,11 @@ void test2()
 /*******************************************/
 
 template Qwert3(string yuiop) {
-    invariant string Qwert3 = cast(string)yuiop;
+    immutable string Qwert3 = cast(string)yuiop;
 }
 
 template Asdfg3(string yuiop) {
-    invariant string Asdfg3 = cast(string)Qwert3!(cast(string)(cast(string)yuiop ~ cast(string)"hjkl"));
+    immutable string Asdfg3 = cast(string)Qwert3!(cast(string)(cast(string)yuiop ~ cast(string)"hjkl"));
 }
 
 void test3()
@@ -72,31 +72,13 @@ void test3()
 
 template Qwert4(string yuiop)
 {
-    invariant string Qwert4 = cast(string)(yuiop ~ "asdfg" ~ yuiop);
+    immutable string Qwert4 = cast(string)(yuiop ~ "asdfg" ~ yuiop);
 }
 
 void test4()
 {
     string hjkl = Qwert4!(null);
     assert(hjkl == "asdfg");
-}
-
-/*******************************************/
-
-struct Ranged(T)
-{
-    T value, min, max, range;
-}
-
-typedef Ranged!(float) Degree = {0f, 0f, 360f, 360f};
-
-void test5()
-{
-    static Degree a;
-    assert(a.value == 0f);
-    assert(a.min == 0f);
-    assert(a.max == 360f);
-    assert(a.range == 360f);
 }
 
 /*******************************************/
@@ -108,7 +90,7 @@ void test6()
         void foo() { }
     }
 
-    typedef Foo Bar;
+    alias Foo Bar;
 
     Bar a;
     a.foo();
@@ -196,26 +178,26 @@ void test10()
 struct Foo11
 {
     static
-	void func(T)(T a) { assert(a == 1); }
+	int func(T)(T a) { assert(a == 1); return 0; }
 }
 
 void test11()
 {
-	Foo11.init.func(1);
-	Foo11.init.func!(int)(1);
-	Foo11.func(1);
-	Foo11.func!(int)(1);
+	auto a = Foo11.init.func(1);
+	a = Foo11.init.func!(int)(1);
+	a = Foo11.func(1);
+	a = Foo11.func!(int)(1);
 }
 
 /*******************************************/
 
 void test12()
 {
-    class Exception { }
+    class ExceptioN { }
 
     class ExceptioX { }
 
-    static assert(Exception.mangleof[0 ..$-1] == ExceptioX.mangleof[0 .. $-1]);
+    static assert(ExceptioN.mangleof[0 ..$-1] == ExceptioX.mangleof[0 .. $-1]);
 }
 
 /*******************************************/
@@ -258,24 +240,6 @@ void test15()
 
 /*******************************************/
 
-typedef uint socket_t = -1u;
-
-class Socket
-{
-    socket_t sock;
-    
-    void accept()
-    {
-	    socket_t newsock;
-    }
-}
-
-void test16()
-{
-}
-
-/*******************************************/
-
 void test17()
 {
     void delegate() y = { };
@@ -287,11 +251,11 @@ void test17()
 abstract class Pen { int foo(); }
 
 class Penfold : Pen {
-    int foo() { return 1; }
+    override int foo() { return 1; }
 }
 
 class Pinky : Pen {
-    int foo() { return 2; }
+    override int foo() { return 2; }
 }
 
 class Printer {
@@ -339,7 +303,7 @@ class B19 : A19
 {
     alias A19.s s;
     static void s(int i) {}
-    void s() {}
+    override void s() {}
 }
 
 class C19
@@ -379,7 +343,7 @@ void test20()
 //	uSar(sar);	// T[2] => U[2]
 //	uDar(sar);	// T[2] => U[]
 
-	uDar(dar);	// T[] => U[]
+	uDar(dar);	// T[] => const(U)[]
 	vPtr(ptr);	// T* => void*
 	vPtr(sar.ptr);
 	vPtr(dar.ptr);
@@ -392,7 +356,7 @@ void tPtr(T*t){}
 void tDar(T[]t){}
 void uPtr(U*u){}
 void uSar(U[2]u){}
-void uDar(U[]u){}
+void uDar(const(U)[]u){}
 void vPtr(void*v){}
 void vDar(void[]v){}
 
@@ -798,9 +762,9 @@ void test37()
 
 class C38 { }
 
-Object[] foo38(C38[3] c)
-{   Object[] x = c;
-    return x.dup;
+const(Object)[] foo38(C38[3] c)
+{   const(Object)[] x = c;
+    return x;
 }
 
 void test38()
@@ -974,12 +938,9 @@ void test47()
 void test48()
 {
     Object o = new Object();
-    auto s = typeof(o).classinfo.name;
-    printf("%.*s\n", s.length, s.ptr);
-    s = (typeof(o)).classinfo.name;
-    printf("%.*s\n", s.length, s.ptr);
-    s = (Object).classinfo.name;
-    printf("%.*s\n", s.length, s.ptr);
+    printf("%.*s\n", typeof(o).classinfo.name.length, typeof(o).classinfo.name.ptr);
+    printf("%.*s\n", (typeof(o)).classinfo.name.length, (typeof(o)).classinfo.name.ptr);
+    printf("%.*s\n", (Object).classinfo.name.length, (Object).classinfo.name.ptr);
 }
 
 /*******************************************/
@@ -1096,32 +1057,6 @@ void test55()
 	if (a[0][0] <>= 0.0){
 		assert(0);
 	}
-}
-
-/*******************************************/
-
-typedef int Xint = 42;
-
-void test56()
-{
-    Xint[3][] x = new Xint[3][4];
-
-    foreach(Xint[3] i; x) {
-        foreach (Xint j; i)
-            assert(j == 42);
-    }
-}
-
-void test57()
-{
-    Xint[3][] x = new Xint[3][4];
-    x.length = 200;
-    assert(x.length == 200);
-
-    foreach(Xint[3] i; x) {
-        foreach (Xint j; i)
-            assert(j == 42);
-    }
 }
 
 /*******************************************/
@@ -1306,7 +1241,7 @@ T dot65(T, uint dim)(Vector65!(T,dim) a, Vector65!(T,dim) b)
 void test65()
 {
   Vector65!(double,3u) a,b;
-  dot65(a,b);
+  auto t = dot65(a,b);
 }
 
 
@@ -1320,7 +1255,6 @@ void main()
     test2();
     test3();
     test4();
-    test5();
     test6();
     test7();
     test8();
@@ -1331,7 +1265,6 @@ void main()
     test13();
     test14();
     test15();
-    test16();
     test17();
     test18();
     test19();
@@ -1371,8 +1304,6 @@ void main()
     test53();
     test54();
     test55();
-    test56();
-    test57();
     test58();
     test59();
     test60();

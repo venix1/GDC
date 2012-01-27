@@ -836,7 +836,7 @@ class A13
  A13 opShl(string x)
  {
     printf("A::opShl(char[])\n");
-    printf("%.*s",x);
+    printf("%.*s", x.length, x.ptr);
     return this;
  }
 }
@@ -907,6 +907,11 @@ void test15()
   Fig fx, fy;
   if (fx==2) {}
 }
+
+/**************************************/
+
+//void bug4953(T = void)(short x) {}
+//static assert(is(typeof(bug4953(3))));
 
 /**************************************/
 

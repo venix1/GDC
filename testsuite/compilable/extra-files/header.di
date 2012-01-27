@@ -82,6 +82,31 @@ d /= 8;
 break;
 }
 }
+enum Label 
+{
+A,
+B,
+C,
+}
+;
+void fswitch(Label l)
+{
+final switch (l)
+{
+case A:
+{
+break;
+}
+case B:
+{
+break;
+}
+case C:
+{
+break;
+}
+}
+}
 loop:
 while (x)
 {
@@ -95,8 +120,7 @@ do
 {
 x++;
 }
-while (x < 10);
-try
+while (x < 10);try
 {
 try
 {
@@ -310,7 +334,7 @@ bool foo6(int a, int b, int c, int d)
 {
 return (a < b) != (c < d);
 }
-auto  foo7(int x)
+auto foo7(int x)
 {
 return 5;
 }
@@ -359,4 +383,43 @@ return 0;
 }
 );
 }
+}
+struct S6360
+{
+    @property const pure nothrow long weeks1()
+{
+return 0;
+}
+
+    const nothrow pure @property long weeks2()
+{
+return 0;
+}
+
+}
+struct S12
+{
+    nothrow this(int n)
+{
+}
+    nothrow this(string s)
+{
+}
+
+}
+struct T12
+{
+    template __ctor()
+{
+immutable this(int args)
+{
+}
+}
+    immutable template __ctor(A...)
+{
+this(A args)
+{
+}
+}
+
 }

@@ -176,20 +176,6 @@ void test4()
     else
 	assert(0);
 
-
-    typedef char Typedef;
-
-    static if (is(Typedef Char == typedef))
-	printf("if\n");
-    else
-	assert(0);
-
-    static if (is(Char == char))
-	printf("if\n");
-    else
-	assert(0);
-
-
     class Class { }
 
     static if (is(Class == class))
@@ -752,7 +738,7 @@ alias TFoo27!(2+1) b;
 alias TFoo27!(3u) c;
 
 static assert(is(TFoo27!(3) == TFoo27!(2 + 1)));
-static assert(!is(TFoo27!(3) == TFoo27!(3u)));
+static assert(is(TFoo27!(3) == TFoo27!(3u)));
 
 void test27()
 {

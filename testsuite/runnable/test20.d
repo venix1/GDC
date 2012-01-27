@@ -573,6 +573,7 @@ void Lookup( int which )
    switch( which )
    {
      case 0 : return cast(void)array[which];
+     default: assert(0);
    }
 }
 
@@ -603,20 +604,6 @@ void test31()
     foo31(--x);
     --x;
     foo31(++x);
-}
-
-/*****************************************/
-
-void test32()
-{
-	typedef int Type = 12;
-	static Type[5] var = [0:1, 3:2];
-
-	assert(var[0] == 1);
-	assert(var[1] == 12);
-	assert(var[2] == 12);
-	assert(var[3] == 2);
-	assert(var[4] == 12);
 }
 
 /*****************************************/
@@ -1298,7 +1285,6 @@ int main()
     test29();
     test30();
     test31();
-    test32();
     test33();
     test34();
     test35();

@@ -3,7 +3,7 @@
 static assert(__LINE__ == 3); // fails as __LINE__ is 2
 
 import std.stdio;
-import std.math;
+import std.math : signbit;
 
 
 /************************************/
@@ -344,6 +344,25 @@ static assert(['a','b','c','d'] == "abcd");
 static assert("efgh" == ['e','f','g','h']);
 static assert("efgi" != ['e','f','g','h']);
 
+static assert((2 ^^ 8) == 256);
+static assert((3 ^^ 8.0) == 6561);
+static assert((4.0 ^^ 8) == 65536);
+static assert((5.0 ^^ 8.0) == 390625);
+
+static assert((0.5 ^^ 3) == 0.125);
+static assert((1.5 ^^ 3.0) == 3.375);
+static assert((2.5 ^^ 3) == 15.625);
+static assert((3.5 ^^ 3.0) == 42.875);
+
+static assert(((-2) ^^ -5.0) == -0.031250);
+static assert(((-2.0) ^^ -6) == 0.015625);
+static assert(((-2.0) ^^ -7.0) == -0.0078125);
+
+static assert((144 ^^ 0.5) == 12);
+static assert((1089 ^^ 0.5) == 33);
+static assert((1764 ^^ 0.5) == 42);
+static assert((650.25 ^^ 0.5) == 25.5);
+
 
 void test1()
 {
@@ -370,8 +389,14 @@ void test2()
     int i = cast(int) f;
     writeln(i);
     writeln(cast(int)float.max);
-    assert(i == cast(int)float.max || i == cast(int)float.max+1);
-    assert(i == 0x80000000 || i == 0x7fffffff);
+  version (GNU)
+  {
+  }
+  else
+  {
+    assert(i == cast(int)float.max);
+    assert(i == 0x80000000);
+  }
 }
 
 /************************************/
@@ -414,7 +439,7 @@ alias uint DWORD;
 MY_API_FUNCTION lpStartAddress;
 extern (Windows) alias DWORD function(void*) MY_API_FUNCTION;
 pragma(msg, MY_API_FUNCTION.stringof);
-static assert(MY_API_FUNCTION.stringof == "uint Windows function(void*)");
+static assert(MY_API_FUNCTION.stringof == "extern (Windows) uint function(void*)");
 
 /************************************/
 
@@ -465,12 +490,83 @@ int foo9() {
 static assert(foo9()==2);
 
 /************************************/
+// Bugzilla 6077
+
+void test6077() {
+    static string scat(string s1, string s2)
+    {
+        return s1 ~ s2;
+    }
+
+    static string scatass(string s1, string s2)
+    {
+        s1 ~= s2;
+        return s1;
+    }
+
+    static string[] arycats(string[] ary, string s)
+    {
+        return ary ~ s;
+    }
+
+    static string[] scatary(string s, string[] ary)
+    {
+        return s ~ ary;
+    }
+
+    static string[] arycatasss(string[] ary, string s)
+    {
+        ary ~= s;
+        return ary;
+    }
+
+    static assert(scat(null, null) is null);
+    static assert(scatass(null, null) is null);
+    static assert(arycats(null, null) == cast(string[])[null]);
+    static assert(scatary(null, null) == cast(string[])[null]);
+    static assert(arycatasss(null, null) == cast(string[])[null]);
+}
+
+/************************************/
+
+int test4()
+{
+    int i;
+
+    dchar  d;
+    d  >>= 1;
+    d >>>= 1;
+    d  <<= 1;
+    d = d  >> 1;
+    d = d >>> 1;
+    d = d  << 1;
+    wchar  w;
+    w  >>= 1;
+    w >>>= 1;
+    w  <<= 1;
+    w = w  >> 1;
+    w = w >>> 1;
+    i = w  << 1; // promoted to int
+    char   c;
+    c  >>= 1;
+    c >>>= 1;
+    c  <<= 1;
+    c = c  >> 1;
+    c = c >>> 1;
+    i = c  << 1; // promoted to int
+    return d + w + c + i;
+}
+
+static assert(test4() == 24666);
+
+/************************************/
 
 int main()
 {
     test1();
     test2();
     test3();
+    test6077();
 
     printf("Success\n");
     return 0;

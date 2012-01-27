@@ -87,6 +87,10 @@ bool findTestParameter(string file, string token, ref string result)
 
     //writeln("arg: '", result, "'");
 
+    string result2;
+    if (findTestParameter(file[tokenStart+lineEnd..$], token, result2))
+        result ~= " " ~ result2;
+
     return true;
 }
 
@@ -100,18 +104,7 @@ void gatherTestParameters(ref TestArgs testArgs, string input_dir, string input_
         testArgs.requiredArgs ~= " ";
     }
 
-    // TODO: should the win32 anti -fPIC code be moved out and made unilateral, would eliminate
-    // different ARGS settings in the Makefile
-    if (findTestParameter(file, "PERMUTE_ARGS", testArgs.permuteArgs))
-    {
-        if (envData.os == "win32")
-        {
-            auto index = std.string.indexOf(testArgs.permuteArgs, "-fPIC");
-            if (index != -1)
-                testArgs.permuteArgs = testArgs.permuteArgs[0 .. index] ~ testArgs.permuteArgs[index+5 .. $];
-        }
-    }
-    else
+    if (! findTestParameter(file, "PERMUTE_ARGS", testArgs.permuteArgs))
     {
         if (testArgs.mode != TestMode.FAIL_COMPILE)
             testArgs.permuteArgs = envData.all_args;
@@ -120,8 +113,17 @@ void gatherTestParameters(ref TestArgs testArgs, string input_dir, string input_
         if(!findTestParameter(file, "unittest", unittestJunk))
             testArgs.permuteArgs = replace(testArgs.permuteArgs, "-unittest", "");
     }
+
+    // win32 doesn't support pic, nor does freebsd/64 currently
+    if (envData.os == "win32" || envData.os == "freebsd")
+    {
+        auto index = std.string.indexOf(testArgs.permuteArgs, "-fPIC");
+        if (index != -1)
+            testArgs.permuteArgs = testArgs.permuteArgs[0 .. index] ~ testArgs.permuteArgs[index+5 .. $];
+    }
+
     // clean up extra spaces
-    testArgs.permuteArgs = replace(testArgs.permuteArgs, "  ", " ");
+    testArgs.permuteArgs = strip(replace(testArgs.permuteArgs, "  ", " "));
 
     findTestParameter(file, "EXECUTE_ARGS", testArgs.executeArgs);
 
@@ -178,7 +180,7 @@ string genTempFilename()
     foreach (ref e; 0 .. 8)
     {  
         formattedWrite(a, "%x", rndGen.front);
-        rndGen.popFront;
+        rndGen.popFront();
     }
 
     return a.data;
@@ -224,9 +226,9 @@ void execute(ref File f, string command, bool expectpass)
     {
         auto value = WEXITSTATUS(rc);
         if (expectpass)
-            enforce(0 == value, "expected rc == 0, exited with rc=" ~ to!string(value));
+            enforce(0 == value, "expected rc == 0, exited with rc == " ~ to!string(value));
         else
-            enforce(1 == value, "expected rc == 1, but exited with rc=" ~ to!string(value));
+            enforce(1 == value, "expected rc == 1, but exited with rc == " ~ to!string(value));
     }
 }
 
@@ -265,6 +267,9 @@ int main(string[] args)
         case "compilable":       testArgs.mode = TestMode.COMPILE;      break;
         case "fail_compilation": testArgs.mode = TestMode.FAIL_COMPILE; break;
         case "runnable":         testArgs.mode = TestMode.RUN;          break;
+        default:
+            writeln("input_dir must be one of 'compilable', 'fail_compilation', or 'runnable'");
+            return 1;
     }
 
     gatherTestParameters(testArgs, input_dir, input_file, envData);
@@ -353,13 +358,15 @@ int main(string[] args)
         }
         catch(Exception e)
         {
-            f.writeln("Caught exception, bailing: ", e.toString());
+            f.writeln();
+            f.writeln("==============================");
+            f.writeln("Test failed: ", e.msg);
             f.close();
 
             writeln("Test failed.  The logged output:");
             if (std.file.exists(output_file))
             {
-                writeln(std.file.read(output_file));
+                writeln(cast(string)std.file.read(output_file));
                 std.file.remove(output_file);
             }
             return 1;

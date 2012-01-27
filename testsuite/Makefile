@@ -68,8 +68,10 @@ else
     SHELL=/bin/bash
 endif
 QUIET=@
+#QUIET=
 export RESULTS_DIR=test_results
 export MODEL=32
+#export MODEL=64
 
 ifeq ($(OS),win32)
 export ARGS=-inline -release -g -O -unittest
@@ -80,7 +82,7 @@ export DSEP=\\
 export SEP=$(shell echo '\')
 # bug in vim syntax hilighting, needed to kick it back into life: ')
 else
-export ARGS=-inline -release -g -O -unittest
+export ARGS=-inline -release -g -O -unittest -gs
 export DMD=gdmd
 export EXE=
 export OBJ=.o
@@ -98,37 +100,39 @@ DISABLED_TESTS += builtin
 
 DISABLED_TESTS += dhry
 # runnable/dhry.d(488): Error: undefined identifier dtime
+
+# 64 bit test failures
+DISABLED_TESTS += test17
+DISABLED_SH_TESTS += test39
 endif
 
 ifeq ($(DMD),gdmd)
+DMD=$(shell which gdmd)
+
 # gdc does not implement dmd coverage
 DISABLED_TESTS += a20 cov2 sieve
 
 # gdc does not implement dmd profiling
 DISABLED_TESTS += hello-profile
 
-# precision related bugs
-DISABLED_TESTS += ctorpowtests
+# inout contract inheritance unimplemented
+#DISABLED_TESTS += test42 testcontracts
 
-# inline asm bug.
-DISABLED_TESTS += test22
+# no exception chaining in gdc
+DISABLED_TESTS += eh test4
+
+# iasm not up to par with DMD
+DISABLED_TESTS += iasm iasm64
 
 # std.format bug
 DISABLED_TESTS += testformat
 
-# inout contract inheritance unimplemented
-DISABLED_TESTS += test42 testcontracts
+# New closures bug
+#DISABLED_TESTS += inner nested
 
-# catch block not removed in gdc
-DISABLED_TESTS += warning1
+# NRVO unimplemented
+#DISABLED_TESTS += sdtor
 
-# ctor not emitted bug
-DISABLED_TESTS += xtest46
-
-# cfgexpand bug
-DISABLED_TESTS += nested
-
-export DMD=$(shell which gdmd)
 endif
 
 runnable_tests=$(wildcard runnable/*.d) $(wildcard runnable/*.html) $(wildcard runnable/*.sh)
@@ -143,6 +147,9 @@ fail_compilation_test_results=$(addsuffix .out,$(addprefix $(RESULTS_DIR)/,$(fai
 all: run_tests
 
 $(addsuffix .d.out,$(addprefix $(RESULTS_DIR)/runnable/,$(DISABLED_TESTS))): $(RESULTS_DIR)/.created
+	$(QUIET) echo " ... $@ - disabled"
+
+$(addsuffix .sh.out,$(addprefix $(RESULTS_DIR)/runnable/,$(DISABLED_SH_TESTS))): $(RESULTS_DIR)/.created
 	$(QUIET) echo " ... $@ - disabled"
 
 $(RESULTS_DIR)/runnable/%.d.out: runnable/%.d $(RESULTS_DIR)/.created $(RESULTS_DIR)/d_do_test $(DMD)

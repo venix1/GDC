@@ -1,3 +1,5 @@
+import std.math;
+
 extern(C) int printf(const char*, ...);
 
 string abc;
@@ -422,6 +424,109 @@ void test4()
     if (a && b) {}
 }
 
+/***************************************************/
+// 5284
+
+void bug5284_1()
+{
+    class C { int v; }
+
+              C [] mda;
+    immutable(C)[] ida;
+    static assert(!__traits(compiles, (mda[] = ida[])));
+
+              C [1] msa;
+    immutable(C)[1] isa;
+    static assert(!__traits(compiles, (msa[] = isa[])));
+
+              C  m;
+    immutable(C) i;
+    static assert(!__traits(compiles, m = i));
+}
+void bug5284_2a()
+{
+    struct S { int v; }
+
+              S [] mda;
+    immutable(S)[] ida;
+    mda[] = ida[];
+
+              S [1] msa;
+    immutable(S)[1] isa;
+    msa[] = isa[];
+
+              S  m = S();
+    immutable(S) i = immutable(S)();
+    m = i;
+}
+void bug5284_2b()
+{
+    struct S { int v; int[] arr; }
+
+              S [] mda;
+    immutable(S)[] ida;
+    static assert(!__traits(compiles, (mda[] = ida[])));
+
+              S [1] msa;
+    immutable(S)[1] isa;
+    static assert(!__traits(compiles, (msa[] = isa[])));
+
+              S  m;
+    immutable(S) i;
+    static assert(!__traits(compiles, m = i));
+}
+void bug5284_3()
+{
+              int [] ma;
+    immutable(int)[] ia;
+    ma[] = ia[];
+
+    int m;
+    immutable(int) i;
+    m = i;
+}
+
+void test5()
+{
+    bug5284_1();
+    bug5284_2a();
+    bug5284_2b();
+    bug5284_3();
+}
+
+/************************************************************************/
+
+void test6()
+{
+    int[10] a = [1,2,3,4,5,6,7,8,9,10];
+    int[10] b;
+
+    b = a[] ^^ 2;
+    assert(b[0] == 1);
+    assert(b[1] == 4);
+    assert(b[2] == 9);
+    assert(b[3] == 16);
+    assert(b[4] == 25);
+    assert(b[5] == 36);
+    assert(b[6] == 49);
+    assert(b[7] == 64);
+    assert(b[8] == 81);
+    assert(b[9] == 100);
+
+    int[10] c = 3;
+    b = a[] ^^ c[];
+    assert(b[0] == 1);
+    assert(b[1] == 8);
+    assert(b[2] == 27);
+    assert(b[3] == 64);
+    assert(b[4] == 125);
+    assert(b[5] == 216);
+    assert(b[6] == 343);
+    assert(b[7] == 512);
+    assert(b[8] == 729);
+    assert(b[9] == 1000);
+}
+
 /************************************************************************/
 
 int main()
@@ -430,6 +535,8 @@ int main()
     test2();
     test3();
     test4();
+    test5();
+    test6();
 
     printf("Success\n");
     return 0;

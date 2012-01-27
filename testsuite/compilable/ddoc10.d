@@ -158,4 +158,15 @@ float f10(float a, float b) { return (a+b)/2.0; }
 float h10(float a, float b) { return (a+b)/2.0; }
 
 
+///
+void bug6090(string f="$(B b)", char g=')')(string h="$(", string i="$)") {}
 
+
+/****
+ */
+struct T
+{
+    /****
+     */
+    this(A...)(A args) { }
+}

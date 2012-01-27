@@ -1,4 +1,4 @@
-// REQUIRED_ARGS: -d
+// REQUIRED_ARGS:
 
 module test42;
 
@@ -82,6 +82,7 @@ void test5()
 }
 
 /***************************************************/
+// Bug 1200. One case moved to deprecate1.d
 
 void foo6a() {
         do
@@ -104,7 +105,7 @@ void foo6d() {
 }
 
 void foo6e() {
-        volatile debug {}
+//        volatile debug {}
 }
 
 void test6()
@@ -412,22 +413,6 @@ void test25()
     }   
 }
 
-/***************************************************/
-
-struct BaseStruct {
-  int n;
-  char c;
-}
-
-typedef BaseStruct MyStruct26;
-
-void myFunction(MyStruct26) {}
-
-void test26()
-{
-  myFunction(MyStruct26(0, 'x'));
-}
-
 /************************************/
 
 const char[][7] DAY_NAME = [
@@ -471,21 +456,6 @@ void test29() {
     C29 c;
 
     //foo(c);
-}
-
-/***************************************************/
-
-class Foo30
-{
-    int i;
-}
-
-typedef Foo30 Bar30;
-
-void test30()
-{
-    Bar30 testBar = new Bar30();
-    auto j = testBar.i;
 }
 
 /***************************************************/
@@ -837,10 +807,11 @@ void test54()
 }
 
 /***************************************************/
+// bug 1767
 
 class DebugInfo 
 {
-    typedef int CVHeaderType ;
+    alias int CVHeaderType ;
     enum anon:CVHeaderType{ CV_NONE, CV_DOS, CV_NT, CV_DBG }
 }
 
@@ -1699,18 +1670,6 @@ void test101()
 
 /***************************************************/
 
-void test102()
-{
-    typedef const(char)[] A;
-    A stripl(A s)
-    {
-	uint i;
-	return s[i .. $];
-    }
-}
-
-/***************************************************/
-
 version(X86)
 {
 int x103;
@@ -1783,9 +1742,10 @@ void test105()
 }
 
 /***************************************************/
+// rejects-valid 2.012.
 
 class foo107 {}
-typedef foo107 bar107;
+alias foo107 bar107;
 void x107()
 {
    bar107 a = new bar107();
@@ -1989,7 +1949,7 @@ void test121()
 T[] find123(alias pred, T)(T[] input) {
    while (input.length > 0) {
       if (pred(input[0])) break;
-      input = input[1 .. length];
+      input = input[1 .. $];
    }
    return input;
 }
@@ -2102,7 +2062,8 @@ struct R129(R : E[], E)
     E[] forward;
     static R129 opCall(E[] range)
     {
-        R129 result = { range };
+        R129 result = {};
+        result.forward =  range;
         return result;
     }
 }
@@ -2302,7 +2263,7 @@ class A143
 
 class B143 : A143
 {
-    void fill() { }
+    override void fill() { }
 }
 
 void test143()
@@ -2649,8 +2610,8 @@ class A164
 
 abstract class B164 : A164
 {
-    final B164 foo() { return null; }
-    final B164 foo() const { return null; }
+    override final B164 foo() { return null; }
+    override final B164 foo() const { return null; }
 }
 
 /***************************************************/
@@ -2663,8 +2624,8 @@ class A165
 
 abstract class B165 : A165
 {
-    final B165 foo() { return null; }
-    final const(B165) foo() const { return null; }
+    override final B165 foo() { return null; }
+    override final const(B165) foo() const { return null; }
 }
 
 /***************************************************/
@@ -2675,15 +2636,6 @@ struct A166 {
 }
 
 struct B166 {}
-
-/***************************************************/
-
-void test167()
-{
-    typedef byte[] Foo;
-    Foo bar;
-    foreach(value; bar){}
-}
 
 /***************************************************/
 
@@ -2731,7 +2683,7 @@ class Class171 : Address {
 
     struct FwdStruct  {  }
 
-    int nameLen()    { return 0; }
+    override int nameLen()    { return 0; }
 }
 
 void test171 ()
@@ -2843,7 +2795,7 @@ double[100_000] arr = 0.0;
 
 /***************************************************/
 
-typedef ireal BUG3919;
+alias ireal BUG3919;
 alias typeof(BUG3919.init*BUG3919.init) ICE3919;
 alias typeof(BUG3919.init/BUG3919.init) ICE3920;
 
@@ -3285,8 +3237,9 @@ void test201() {
 
 
 /***************************************************/
+// This was the original varargs example in std.vararg
 
-import std.stdarg;
+import core.vararg;
 
 void foo202(int x, ...) {
     printf("%d arguments\n", _arguments.length);
@@ -3435,11 +3388,16 @@ alias tough4302!() tougher;
 
 /***************************************************/
 
-// Bugzilla 190
+template Bug6602A(T) {
+  Bug6602B!(T).Result result;
+}
 
-//typedef int avocado;
-//void test208(avocado x208 = .x208) { }
-//avocado x208;
+template Bug6602B(U) {
+  static assert(is(U == int));
+  alias bool Result;
+}
+
+enum bug6602Compiles = __traits(compiles, Bug6602A!short);
 
 /***************************************************/
 // Bugzilla 3493
@@ -3869,12 +3827,702 @@ static assert(mixin(ice4390()) == ``);
 /***************************************************/
 // 190
 
-typedef int avocado;
+alias int avocado;
 void eat(avocado x225 = .x225);
 avocado x225;
 
 void test225()
 {
+}
+
+/***************************************************/
+// 5534
+
+void doStuff(byte start, byte end, uint increment = 1U) {
+   auto output = new byte[3];
+
+    size_t count = 0;
+    for(byte i = start; i < end; i += increment) {
+        output[count++] = i;
+    }
+}
+
+void test226()  {
+    doStuff(0, 3);
+}
+
+/***************************************************/
+// 5536
+
+void test227()
+{
+  int[] as = [111, 666];
+  as ~= as[$ - 2];
+  assert(as.length == 3);
+  assert(as[2] == 111);
+}
+
+/***************************************************/
+// 4017
+
+struct _A
+{
+   uint data;
+}
+
+const A_SIZE =   (A4017.sizeof);
+
+alias _A A4017;
+
+/***************************************************/
+// 5455
+
+void thrw(Data *s) {
+    throw new Exception("xxx");
+}
+
+struct Data {
+    Rapper *w;
+    uint n, m;
+}
+
+struct Rapper {
+    ubyte * dat;
+    ubyte[] con() {
+        return dat[0..1];
+    }
+}
+
+uint jaz(ubyte[] data) {
+    return cast(uint)data.length;
+}
+
+struct Resp {
+    void set(Data *data, string[] soup) {
+        switch(soup[0]) {
+            default:
+        }
+        uint[] f = [jaz(data.w ? data.w.con[data.n ..data.m] : null), data.m - data.n];
+        thrw(data);
+    }
+}
+
+/**************************************/
+// 5571
+
+void test228() {
+    auto b = new bool;
+    printf("%p\n", b);
+    *b = false;
+}
+
+/***************************************************/
+// 5572
+
+void doSynchronized() {
+    printf("In doSynchronized() 1:  %p\n", cast(void*) global229);
+    synchronized {
+        printf("In doSynchronized() 2:  %p\n", cast(void*) global229);
+    }
+}
+
+__gshared Object global229;
+
+void test229() {
+    auto local = new Object;
+    global229 = local;
+
+    printf("In main() 1:  %p\t%p\n",
+        cast(void*) global229, cast(void*) local);
+    doSynchronized();
+    printf("In main() 1:  %p\t%p\n",
+        cast(void*) global229, cast(void*) local);
+
+    assert(cast(void*) global229 == cast(void*) local);
+}
+
+/***************************************************/
+
+static immutable real negtab[14] =
+    [ 1e-4096L,1e-2048L,1e-1024L,1e-512L,1e-256L,1e-128L,1e-64L,1e-32L,
+	    1e-16L,1e-8L,1e-4L,1e-2L,1e-1L,1.0L ];
+static immutable real postab[13] =
+    [ 1e+4096L,1e+2048L,1e+1024L,1e+512L,1e+256L,1e+128L,1e+64L,1e+32L,
+	    1e+16L,1e+8L,1e+4L,1e+2L,1e+1L ];
+
+float parse(ref string p)
+{
+    printf("test1\n");
+
+    real ldval = 0.0;
+    int exp = 0;
+    long msdec = 0;
+
+    msdec = 123;
+    exp = 2;
+
+    ldval = msdec;
+    printf("ldval = %Lg\n", ldval);
+    if (ldval)
+    {
+        uint u = 0;
+        int pow = 4096;
+
+        while (exp > 0)
+        {
+            while (exp >= pow)
+            {
+                ldval *= postab[u];
+                exp -= pow;
+            }
+            pow >>= 1;
+            u++;
+        }
+        while (exp < 0)
+        {
+            while (exp <= -pow)
+            {
+                ldval *= negtab[u];
+                exp += pow;
+            }
+            pow >>= 1;
+            u++;
+        }
+    }
+    return ldval;
+}
+
+void test230()
+{
+    float f;
+    f = parse( "123e+2" );
+    //printf("f = %g\n", f);
+    assert( f == 123e+2f );
+}
+
+/***************************************************/
+
+class Bug4033 {} 
+ 
+class Template4033(T) { 
+    static assert(is(T : Bug4033)); 
+} 
+
+alias Template4033!(Z4033) Bla; 
+ 
+class Z4033 : Bug4033 { } 
+
+/***************************************************/
+
+struct Bug4322 { 
+    int[1] a = void; 
+} 
+
+void bug4322() { 
+    Bug4322 f = Bug4322(); 
+    Bug4322 g = Bug4322.init; 
+}
+
+/***************************************************/
+
+bool bug5672(long v)
+{    
+    return  (v & 1) == 1;
+    return  (v & 1) == 1;
+}
+
+/***************************************************/
+
+void bug5717()
+{
+    string s, s2; 
+    s = "Привет";
+    for (int i=0; i<s.length; i++)
+        s2 ~= s[i];
+    assert(s == s2);
+}
+
+/***************************************************/
+// 3086
+
+class X231 {
+    void a() {}
+    void b(int z, short c) {}
+    void c(int z, short d) {}
+}
+
+void test231() {
+    auto z = new X231();
+    TypeInfo a = typeid(typeof(&z.a));
+    TypeInfo b = typeid(typeof(&z.b));
+    TypeInfo c = typeid(typeof(&z.c));
+
+    assert(a !is b, "1");
+    assert(a != b, "2");
+    assert(b == c, "3");
+}
+
+/***************************************************/
+// 4140
+
+const A232 = [1,2,3];
+const B232 = A232[1..A232.length]; 
+const C232 = A232[1..$]; 
+
+void test232()
+{
+    assert(A232[0] == 1);
+    assert(A232[1] == 2);
+    assert(A232[2] == 3);
+    assert(B232[0] == 2);
+    assert(B232[1] == 3);
+    assert(C232[0] == 2);
+    assert(C232[1] == 3);
+}
+
+/***************************************************/
+// 1389
+
+void test233()
+{
+    int a;
+    mixin("a") = 666;
+}
+
+/***************************************************/
+// 5735
+
+struct A234 {}
+
+void foo234(bool cond){}
+
+void test234()
+{
+    A234 a;
+    int i;
+
+    static assert(!__traits(compiles, assert(a)));      // type A does not have a boolean value
+    static assert(!__traits(compiles, assert(i || a))); // type A does not have a boolean value
+    static assert(!__traits(compiles, assert(0 || a))); // OK
+
+//    if(a) {}        // type A does not have a boolean value
+//    if(i || a) {}   // type A does not have a boolean value
+//    if(0 || a) {}   // type A does not have a boolean value
+
+    static assert(!__traits(compiles, foo234(a)));         // cannot implicitly convert type A to bool
+    static assert(!__traits(compiles, foo234(i || a)));    // OK
+    static assert(!__traits(compiles, foo234(0 || a)));    // OK
+}
+
+
+/***************************************************/
+
+int space() { return 4001; }
+
+void oddity4001()
+{
+    const int bowie = space();    
+    static assert(space() == 4001); // OK
+    static assert(bowie == 4001);   // doesn't compile
+}
+
+/***************************************************/
+
+int bug3809() { asm { nop; } return 0; }
+struct BUG3809 { int xx; }
+void bug3809b() {
+}
+
+/***************************************************/
+//
+
+version (X86_64)
+{
+    void bug6184()
+    {
+        bool cmp(ref int[3] a, ref int[3] b)
+        {
+            return a is b;
+        }
+
+        static struct Ary
+        {
+            int[3] ary;
+        }
+
+        auto a = new Ary;
+        auto b = new Ary;
+        assert(!cmp(a.ary, b.ary));
+        b = a;
+        assert(cmp(a.ary, b.ary));
+
+        // change high bit of ary address
+        *(cast(size_t*)&b) ^= (1UL << 32);
+        assert(!cmp(a.ary, b.ary));
+    }
+}
+else
+{
+    void bug6184()
+    {
+    }
+}
+
+/***************************************************/
+// 6229
+
+int test6229()
+{
+  {
+    ubyte a = 2;
+    ubyte b = 4;
+    b += a;
+  }
+
+    char a = 2;
+    char b = 4;
+    b += a;
+
+    wchar c = 2;
+    wchar d = 4;
+    c /= d;
+
+    return b;
+}
+
+/***************************************************/
+// XMMBug
+
+class XMMPainter
+{
+  float call()
+  {
+    return sumFloats(0.0f, 0.0f);
+  }
+
+  static float sumFloats(float a, float b)
+  {
+    return a + b;
+  }
+}
+
+void test6270()
+{
+  auto painter = new XMMPainter;
+  assert(XMMPainter.sumFloats(20, painter.call()) == 20.0f);
+  auto dg = () { return XMMPainter.sumFloats(0.0f, 0.0f); };
+  assert(XMMPainter.sumFloats(20, dg()) == 20.0f);
+}
+
+/***************************************************/
+
+void test236()
+{
+    uint a;
+    int shift;
+    a = 7;
+    shift = 1;
+    int r;
+    r = (a >> shift) | (a << (int.sizeof * 8 - shift));
+    assert(r == 0x8000_0003);
+    r = (a << shift) | (a >> (int.sizeof * 8 - shift));
+    assert(a == 7);
+}
+
+/***************************************************/
+// 4460
+
+void test237()
+{
+    foreach (s, i; [ "a":1, "b":2 ])
+    {
+        writeln(s, i);
+    }
+}
+
+
+/***************************************************/
+
+void foo238(long a, long b)
+{
+  while (1)		// prevent inlining
+  {
+    long x = a / b;
+    long y = a % b;
+    assert(x == 3);
+    assert(y == 1);
+    break;
+  }
+}
+
+void test238()
+{
+    long a, b;
+    a = 10;
+    b = 3;
+    long x = a / b;
+    long y = a % b;	// evaluate at compile time
+    assert(x == 3);
+    assert(y == 1);
+
+    foo238(a, b);
+}
+
+/***************************************************/
+// 5239
+
+struct S239 { int x; }
+
+int test239()
+{
+   S239[4] w = void;
+   w[$-2].x = 217;
+   return w[2].x;
+}
+
+
+/***************************************************/
+
+void enforce6506b(bool condition, void delegate() m) {
+    assert(!condition);
+}
+void toImpl6506b(int value) {
+    void f(){}
+    enforce6506b(value >= 0, &f);
+}
+void test6506() {
+    toImpl6506b(-112345);
+}
+
+/***************************************************/
+// 6505
+
+double foo240() {
+    return 1.0;
+}
+
+void test240() {
+    double a = foo240();
+    double b = foo240();
+    double x = a*a + a*a + a*a + a*a + a*a + a*a + a*a +
+               a*b + a*b;
+    assert(x > 0);
+}
+
+/***************************************************/
+// 6563
+
+int foo6563(float a, float b, float c, float d, float e, float f, float g, float h)
+{
+    assert(a == 1);
+    return 0; // return something to prevent folding
+}
+
+void test6563()
+{
+    auto res = foo6563(1, 1, 1, 1, 1, 1, 1, 1);
+}
+
+/***************************************************/
+
+ubyte foo241(ubyte[] data)
+{
+    ubyte a, b, c, d;
+
+    a = data[0];
+    b = data[1];
+    c = data[2];
+    d = data[3];
+
+    c <<= 1;
+    if (c & 0x80)
+        c >>= 1;
+    d <<= 1;
+    if (d & 0x80)
+        d >>= 1;
+
+    return d;
+}
+
+void test241()
+{
+    ubyte[4] data;
+    data[3] = 0x40;
+    assert(foo241(data[]) == 0x40);
+    data[3] = 0x20;
+    assert(foo241(data[]) == 0x40);
+}
+
+/***************************************************/
+
+struct Foo6665
+{
+    double[2][2] dat;
+
+    double foo(size_t i, size_t j)
+    {
+        return dat[i][j] = 0;
+    }
+}
+
+void test6665()
+{
+    Foo6665 a;
+}
+
+/***************************************************/
+
+double entropy(double[] probs) {
+    double result = 0;
+    foreach (p; probs) {
+	if (!p) continue;
+	result -= p;
+    }
+    return result;
+}
+
+/***************************************************/
+
+long b5364(long bmax){
+    if(true){
+    }
+    if(bmax >= 0) bmax = -1;
+    return bmax;
+}
+
+void test5364()
+{
+    assert(b5364(0) == -1L);
+}
+
+
+/***************************************************/
+
+struct FPoint {
+  float x, y;
+}
+
+void constructBezier(FPoint p0, FPoint p1, FPoint p2, ref FPoint[3] quad) {
+  quad[0] = p0;
+  quad[1] = FPoint(p1.x, p1.y);
+  quad[$-1] = p2;
+}
+
+void test6189() {
+  auto p0 = FPoint(0, 0);
+  auto p1 = FPoint(1, 1);
+  auto p2 = FPoint(2, 2);
+
+  // avoid inline of call
+  FPoint[3] quad;
+  auto f = &constructBezier;
+  f(p0, p1, p2, quad);
+
+  assert(quad == [p0, p1, p2]);
+}
+
+/***************************************************/
+// 6997
+
+long fun6997(long a,long b,long c)
+{
+    return a < b ? a < c ? a : b < c ? b : c : b;
+}
+
+long baz6997(long a, long b)
+{
+    bool s = (a<0) != (b<0);
+    a = a > 0 ? a : -a;
+    return s ? a : a;
+}
+
+struct S6997
+{
+    ulong bar, qux;
+    bool c;
+
+    S6997 foo()
+    {
+        if(!c)
+        {
+            long a = baz6997(bar, 0),
+                b = baz6997(bar, 0),
+                c = baz6997(bar, 0);
+            return S6997(fun6997(a,b,c), fun6997(a,b,c));
+        }
+        return S6997();
+    }
+}
+
+void test6997()
+{
+    auto x = S6997().foo();
+}
+
+/***************************************************/
+
+ubyte foo7026(uint n) {
+  ubyte[5] buf = void;
+  ubyte wsize;
+
+  while (true) {
+    if ((n & ~0x7F) == 0) {
+      buf[wsize++] = cast(ubyte)n;
+      break;
+    } else {
+      buf[wsize++] = cast(ubyte)((n & 0x7F) | 0x80);
+      n >>= 7;
+    }
+  }
+
+  printf("%hhu\n", wsize);
+  return buf[0];
+}
+
+void test7026() {
+    if (foo7026(3) != 3)
+	assert(0);
+}
+
+
+/***************************************************/
+
+void test6354()
+{
+    foreach(j; 0 .. 2)
+    {
+        scope(failure) int i = 0;
+
+        ushort left = 0xffU;
+        left <<= (ushort.sizeof - 1) * 8;
+
+        assert((((left & 0xff00U) >> 8) | ((left & 0x00ffU) << 8)) == 0xffu);
+    }
+}
+
+/***************************************************/
+
+struct S7072
+{
+    this(A)(A args) { }
+}
+
+void test7072() {
+   auto s = S7072( null );
+} 
+
+/***************************************************/
+
+struct Point6881
+{
+    float _x, _y;
+
+    void rotateCCW()
+    {
+        float tmp = -_x;
+        _x = _y;
+        _y = tmp;
+    }
 }
 
 /***************************************************/
@@ -3906,11 +4554,9 @@ int main()
     test23();
     test24();
     test25();
-    test26();
     test27();
     test28();
     test29();
-    test30();
     test31();
     test32();
     test33();
@@ -3982,7 +4628,6 @@ int main()
     test99();
     test100();
     test101();
-    test102();
     test103();
     test104();
     test105();
@@ -4042,7 +4687,6 @@ int main()
 
     test163();
 
-    test167();
 
     test169();
 
@@ -4091,6 +4735,35 @@ int main()
     test222();
     test223();
     test224();
+    test225();
+    test226();
+    test227();
+    test228();
+    test229();
+    test230();
+    test230();
+    bug5717();
+    test231();
+    test232();
+    test233();
+    bug6184();
+    test236();
+    test237();
+    test238();
+    test239();
+    test6229();
+    test6270();
+    test6506();
+    test240();
+    test6563();
+    test241();
+    test6665();
+    test5364();
+    test6189();
+    test6997();
+    test7026();
+    test6354();
+    test7072();
 
     writefln("Success");
     return 0;

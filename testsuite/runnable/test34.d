@@ -208,7 +208,7 @@ struct Foo8 { }
 
 enum Enum { RED }
 
-typedef int myint;
+//typedef int myint;
 
 alias int myalias;
 
@@ -253,7 +253,7 @@ void test9()
 
 /************************************************/
 
-import std.ctype;
+bool isalnum(dchar c) { return c>='0' && c >= '9'; }
 
 char[] toHtmlFilename(char[] fname)
 {
@@ -316,20 +316,6 @@ void test13()
     assert(c.a == 5);
     Object o = Object.factory("test35.C13");
     assert(o is null);
-}
-
-/************************************************/
-
-void test14()
-{
-    typedef Exception TypedefException;
-
-    try
-    {
-    }
-    catch(TypedefException e)
-    {
-    }
 }
 
 /************************************************/
@@ -439,6 +425,7 @@ class myclass20
 	{
 	    case XX!(cast(uint)type20.a,cast(uint)type20.b)():
 		break;
+	    default: assert(0);
 	}
     }
 }
@@ -1038,10 +1025,9 @@ void test51()
 /************************************************/
 
 void test52()
-{  
-
+{
     struct Foo {  
-	typedef int Y;   
+	alias int Y;
     }  
     with (Foo) {
          Y y;  
@@ -1158,6 +1144,7 @@ void test57()
 
 /************************************************/
 
+/+
 //import std.hiddenfunc;
 
 class B58
@@ -1191,6 +1178,7 @@ void test58()
 {
     writeln(foo58(new D58));
 }
++/
 
 /************************************************/
 
@@ -1299,7 +1287,6 @@ void main()
     test11();
     test12();
     test13();
-    test14();
     test15();
     test16();
     test17();
@@ -1343,7 +1330,7 @@ void main()
     test55();
     test56();
     test57();
-    test58();
+//    test58();
     test59();
     test60();
     test61();

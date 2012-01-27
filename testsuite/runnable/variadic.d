@@ -1,6 +1,5 @@
 
 import std.stdio;
-import std.string;
 import std.typetuple;
 import std.traits;
 
@@ -565,6 +564,7 @@ void test28()
 	    case 0:	assert(is(T == int));	 break;
 	    case 1:	assert(is(T == long));	 break;
 	    case 2:	assert(is(T == double)); break;
+	    default:	assert(0);
 	}
     }
 }
@@ -662,32 +662,6 @@ void test32()
 {
     assert(f32(4) == 2);
 }
-
-/***************************************/
-
-template foo33(TA...)
-{
-  const TA[0] foo33=0;
-}
-
-template bar33(TA...)
-{
-  const TA[0..1][0] bar33=TA[0..1][0].init;
-}
-
-void test33()
-{
-    typedef int dummy33=0;
-    typedef int myint=3;
-
-    assert(foo33!(int)==0);
-    assert(bar33!(int)==int.init);
-    assert(bar33!(myint)==myint.init);
-    assert(foo33!(int,dummy33)==0);
-    assert(bar33!(int,dummy33)==int.init);
-    assert(bar33!(myint,dummy33)==myint.init);
-}
-
 
 /***************************************/
 
@@ -858,35 +832,6 @@ void test40()
     assert(TL.length == 2);
     assert(is (TL[0] == A));
     assert(is (TL[1] == I));
-}
-
-/***************************************/
-
-void test41()
-{
-    double bongos(int flux, string soup)
-    {
-        return 0.0;
-    }
-
-    auto foo = mk_future(& bongos, 99, "soup"[]);
-}
-
-int mk_future(A, B...)(A cmd, B args)
-{
-    typedef ReturnType!(A) TReturn;
-    typedef ParameterTypeTuple!(A) TParams;
-    typedef B TArgs;
-
-    alias Foo41!(TReturn, TParams, TArgs) TFoo;
-
-    return 0;
-}
-
-class Foo41(A, B, C) {
-    this(A delegate(B), C)
-    {
-    }
 }
 
 /***************************************/
@@ -1389,6 +1334,37 @@ void test63()
 
 /***************************************/
 
+template Tuple1411(T ...) { alias T Tuple1411; }
+
+void test1411()
+{
+    int delegate(ref Tuple1411!(int, char[], real)) dg; // (*)
+    int f(ref int a, ref char[] b, ref real c) { return 77; }
+    dg = &f;
+}
+
+/***************************************/
+// Bugzilla 4444 
+ 
+void test64() 
+{ 
+    alias TypeTuple!(1) index; 
+    auto arr = new int[4]; 
+    auto x = arr[index];    // error 
+} 
+
+/***************************************/
+// 6700
+
+template bug6700(TList ...) {
+    const int bug6700 = 2;
+}
+TypeTuple!(int, long) TT6700;
+
+static assert(bug6700!( (TT6700[1..$]) )==2);
+ 
+/***************************************/
+
 int main()
 {
     test1();
@@ -1423,7 +1399,7 @@ int main()
     test30();
     test31();
     test32();
-    test33();
+//    test33();
     test34();
     test35();
     test36();
@@ -1431,7 +1407,7 @@ int main()
     test38();
     test39();
     test40();
-    test41();
+ //   test41();
     test42();
     test43();
     test44();
@@ -1454,6 +1430,8 @@ int main()
     test61();
     test62();
     test63();
+    test1411();
+    test64();
 
     printf("Success\n");
     return 0;

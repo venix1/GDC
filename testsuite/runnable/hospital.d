@@ -1,4 +1,4 @@
-// REQUIRED_ARGS: -d
+// REQUIRED_ARGS:
 
 // NOTE: the shootout appears to be BSD licensed content.
 // Including this in the test suite based on that license.
@@ -11,13 +11,13 @@
    contributed by Isaac Gouy 
 */
 
-import std.stdio, std.string;
+import std.stdio, std.string, std.conv;
 import core.memory;
 
 int main(string[] args)
 {
     //std.gc.setV1_0();
-    int n = args.length > 1 ? atoi(args[1]) : 1000;
+    int n = args.length > 1 ? to!int(args[1]) : 1000;
 
     HealthcareRegion healthcareSystem = HealthcareRegion.Create();
 
@@ -162,7 +162,7 @@ private:
             if(!p.remainingTime)
             {
                 availableStaff++;
-		treatment = treatment[0..i] ~ treatment[i+1..length];
+		treatment = treatment[0..i] ~ treatment[i+1..$];
                 discharged.Plus(p);
             }
         }
@@ -182,14 +182,14 @@ private:
                 // no transfer
                 if(genRandom(1.0) > 0.1 || hasNoRegionalHospital)
                 {
-                    examination = examination[0..i] ~ examination[i+1..length];
+                    examination = examination[0..i] ~ examination[i+1..$];
                     treatment ~= p;
                     p.remainingTime = 10;
                     p.hospitalTime += 10;
                 } else {
                 // transfer
                     availableStaff++;
-                    examination = examination[0..i] ~ examination[i+1..length];
+                    examination = examination[0..i] ~ examination[i+1..$];
                     transfers ~= p;
                 }
             }
@@ -206,7 +206,7 @@ private:
                 availableStaff--;
                 p.remainingTime = 3;
                 p.hospitalTime += 3;
-                triage = triage[0..i] ~ triage[i+1..length];
+                triage = triage[0..i] ~ triage[i+1..$];
                 examination ~= p;
             } else {
                 p.hospitalTime++;

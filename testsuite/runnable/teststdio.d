@@ -24,8 +24,9 @@ void main()
 	    case 4:	assert(buf == "\n"); break;
 	    case 5:	assert(buf == "\n"); break;
 	    case 6:	assert(buf == null); break;
+	    default:	assert(0);
 	}
 	i++;
-    } while (!feof(fp))
+    } while (!feof(fp));
     //fclose(fp);
 }
