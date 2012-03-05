@@ -1,3 +1,5 @@
+// { dg-prune-output .* }
+
 // written by Don Clugston:
 //    http://www.digitalmars.com/d/archives/digitalmars/D/announce/4374.html
 //    http://www.99-bottles-of-beer.net/language-d-1212.html

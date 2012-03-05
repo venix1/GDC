@@ -34,7 +34,7 @@ proc dmd2dg { type test } {
 
     switch $type {
         compilable {
-#            puts $fdout {// { dg-final { output-exists } } }
+            puts $fdout {// { dg-final { output-exists } } }
         }
     }
 
@@ -109,8 +109,6 @@ proc gdc-permute-options { options } {
 proc gdc-do-test { } {
     global srcdir subdir
     global verbose
-    global dg-final-code
-
 
     # If a testcase doesn't have special options, use these.
     global DEFAULT_DFLAGS
@@ -139,7 +137,8 @@ proc gdc-do-test { } {
         }
 
         # Convert to DG test.
-        set import_dir "[file dirname $test]/import"
+        set imports [file dirname $test]
+        set imports [format "-I%s -I%s/imports" $imports $imports]
         set filename [dmd2dg $dir $test]
 
         #set options [gdc-permute-options $DEFAULT_DFLAGS]
@@ -152,9 +151,10 @@ proc gdc-do-test { } {
             
             compilable {
                 for { set i 0 } { $i<[llength $options] } { incr i } {
-                    set flags [format "%s -I%s" [lindex $options $i] $import_dir]
+                    set flags [format "%s %s -fdeprecated" [lindex $options $i] $imports]
                     puts "$filename - $flags"
-                    gdc-dg-test $filename  assemble "$flags"
+                    set dg-do-what-default "assemble"
+                    gdc-dg-runtest $test "$flags"
                 }
             }
     

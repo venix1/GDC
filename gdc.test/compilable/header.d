@@ -1,3 +1,5 @@
+// { dg-prune-output .* }
+
 // PERMUTE_ARGS:
 // REQUIRED_ARGS: -H -Hdtest_results/compilable
 // POST_SCRIPT: compilable/extra-files/header-postscript.sh
