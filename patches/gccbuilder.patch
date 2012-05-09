@@ -1,0 +1,74 @@
+diff -rup gcc-4.6.1-tdmsrc-2//Makefile gccbuilder/Makefile
+--- gcc-4.6.1-tdmsrc-2//Makefile	2011-09-21 17:38:00 -0400
++++ gccbuilder/Makefile	2011-12-07 19:07:23 -0500
+@@ -153,8 +153,7 @@ gcc: $(GCC_BUILD)/Makefile
+ 	  CXXFLAGS="-mthreads -O2 -D__USE_MINGW_ACCESS" \
+ 	  BOOT_CXXFLAGS="-mthreads -O2 -D__USE_MINGW_ACCESS" \
+ 	  CXXFLAGS_FOR_TARGET="-mthreads -O2 -D__USE_MINGW_ACCESS" \
+-	  LDFLAGS="-s" BOOT_LDFLAGS="-s" LDFLAGS_FOR_TARGET="-s" \
+-	  bootstrap
++	  LDFLAGS="-s" BOOT_LDFLAGS="-s" LDFLAGS_FOR_TARGET="-s" 
+ 	cd $(GCC_BUILD)/gcc && \
+ 	 rm -f cc1.exe gnat1.exe cc1plus.exe f951.exe jc1.exe jvgenmain.exe \
+ 	  cc1obj.exe cc1objplus.exe
+@@ -164,8 +163,8 @@ $(GCC_BUILD)/Makefile:
+ 	rm -fR $(GCC_BUILD)
+ 	mkdir -p $(GCC_BUILD)
+ 	cd $(GCC_BUILD) && \
+-	 $(GCC_SRC)/configure --build=mingw32 \
+-	  --enable-languages=c,c++,ada,fortran,objc,obj-c++ \
++	 $(GCC_SRC)/configure --build=mingw32 --target=i686-mingw32 \
++	  --enable-languages=c,d \
+ 	  --enable-threads=win32 --enable-libgomp --enable-lto \
+ 	  --enable-fully-dynamic-string --enable-libstdcxx-debug \
+ 	  --enable-version-specific-runtime-libs --with-gnu-ld \
+@@ -175,7 +174,8 @@ $(GCC_BUILD)/Makefile:
+ 	  --enable-cxx-flags='-fno-function-sections -fno-data-sections' \
+ 	  --with-pkgversion="tdm-$(SUB_VER)" \
+ 	  $(UNWIND_ARGS) \
+-	  --with-bugurl="http://tdm-gcc.tdragon.net/bugs"
++	  --with-bugurl="https://bitbucket.org/goshawk/gdc/issues" \
++	  --disable-bootstrap
+ 
+ 
+ ###############
+@@ -434,13 +434,13 @@ $(GCC_BUILD)/Makefile:
+ 	mkdir -p $(GCC_BUILD)
+ 	cd $(GCC_BUILD) && \
+ 	 $(GCC_SRC)/configure --build=x86_64-w64-mingw32 --enable-targets=all \
+-	  --enable-languages=c,c++,fortran,objc,obj-c++ --enable-libgomp \
++	  --enable-languages=c,d --enable-libgomp \
+ 	  --enable-lto --enable-libstdcxx-debug \
+ 	  --enable-version-specific-runtime-libs --enable-fully-dynamic-string \
+ 	  --with-gnu-ld --disable-werror --disable-nls --disable-win32-registry \
+ 	  --prefix=$(GCC_PREFIX) --with-local-prefix=$(GCC_PREFIX) \
+ 	  --with-pkgversion="tdm64-$(SUB_VER)" \
+-	  --with-bugurl="http://tdm-gcc.tdragon.net/bugs"
++	  --with-bugurl="https://bitbucket.org/goshawk/gdc/issues"
+ 
+ .PHONY: expat
+ expat: $(EXPAT_BUILD)/Makefile
+diff -rup gcc-4.6.1-tdmsrc-2//build-tdm-sjlj.sh gccbuilder/build-tdm-sjlj.sh
+--- gcc-4.6.1-tdmsrc-2//build-tdm-sjlj.sh	2011-09-23 10:40:16 -0400
++++ gccbuilder/build-tdm-sjlj.sh	2011-12-07 17:05:13 -0500
+@@ -3,7 +3,7 @@
+ make -f /crossdev/gccbuilder/Makefile \
+  JOBCOUNT=8 \
+  EDITION=tdm32 \
+- GCC_PREFIX=/mingw32tdm \
++ GCC_PREFIX=/crossdev/MinGW32/ \
+  GMP_SRC=/crossdev/src/gmp-4.3.2 \
+  GMP_BUILD=/crossdev/build/gmp-tdm32 \
+  GMP_STAGE=/crossdev/support-stage-tdm32/gmp \
+diff -rup gcc-4.6.1-tdmsrc-2//build-tdm64.sh gccbuilder/build-tdm64.sh
+--- gcc-4.6.1-tdmsrc-2//build-tdm64.sh	2011-09-19 18:16:24 -0400
++++ gccbuilder/build-tdm64.sh	2011-12-07 17:05:14 -0500
+@@ -3,7 +3,7 @@
+ make -f /crossdev/gccbuilder/Makefile \
+  JOBCOUNT=8 \
+  EDITION=tdm64 \
+- GCC_PREFIX=/mingw64tdm \
++ GCC_PREFIX=/crossdev/MinGW64/ \
+  BINUTILS_SRC=/crossdev/src/binutils-2.21.53-20110731 \
+  BINUTILS_BUILD=/crossdev/build/binutils-tdm64 \
+  BINUTILS_STAGE=/crossdev/binutils-stage-tdm64 \

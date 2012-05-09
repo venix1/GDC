@@ -1,0 +1,24 @@
+diff -rupN mpc-0.8.2_original//acinclude.m4 mpc-0.8.2/acinclude.m4
+--- mpc-0.8.2_original//acinclude.m4	2011-10-15 12:02:18 -0400
++++ mpc-0.8.2/acinclude.m4	2011-10-15 12:34:34 -0400
+@@ -196,7 +196,7 @@ MPC_WINDOWS
+ AC_DEFUN([MPC_WINDOWS], [
+    AC_MSG_CHECKING(for DLL/static GMP)
+    if test "$enable_shared" = yes; then
+-     LDFLAGS="$LDFLAGS -no-undefined"
++     LDFLAGS="$LDFLAGS -Wl,-no-undefined"
+      AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[
+ #include "gmp.h"
+ #if !__GMP_LIBGMP_DLL
+diff -rupN mpc-0.8.2_original//configure mpc-0.8.2/configure
+--- mpc-0.8.2_original//configure	2011-10-15 12:02:19 -0400
++++ mpc-0.8.2/configure	2011-10-15 12:34:46 -0400
+@@ -4454,7 +4454,7 @@ case $host in
+    { $as_echo "$as_me:${as_lineno-$LINENO}: checking for DLL/static GMP" >&5
+ $as_echo_n "checking for DLL/static GMP... " >&6; }
+    if test "$enable_shared" = yes; then
+-     LDFLAGS="$LDFLAGS -no-undefined"
++     LDFLAGS="$LDFLAGS -Wl,-no-undefined"
+      cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+ /* end confdefs.h.  */
+ 
