@@ -152,6 +152,7 @@ clean-local:
 	rm -f unittest.o
 	rm -f unittest$(EXEEXT)
 	rm -f libgphobos2.a
+	rm -f libgphobos2_main.a
 	rm -f libgphobos2_t.a
 
 

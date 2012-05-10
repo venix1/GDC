@@ -253,7 +253,7 @@ RT_WINDOWS_OBJS = core/sys/windows/dbghelp.o core/sys/windows/dll.o \
 
 
 # This should not be linked into a shared library.
-CMAIN_OBJS = #rt/cmain.o
+CMAIN_OBJS = rt/dmain.o
 
 # Regardless of OS, all import headers are generated.
 CORE_IMPORTS = core/atomic.di core/bitop.di core/cpuid.di core/demangle.di \
@@ -560,7 +560,7 @@ gcc/cbridge_math.o: gcc/cbridge_math.c
 	$(CC) -o $@ $(OUR_CFLAGS) $(CFLAGS) -fno-strict-aliasing -c $<
 
 libgdruntime.a : $(ALL_DRUNTIME_OBJS) $(CMAIN_OBJS) $(subst core/,$(IMPORT)/core/,$(CORE_IMPORTS))
-	$(AR) -r $@ $(ALL_DRUNTIME_OBJS) $(CMAIN_OBJS)
+	$(AR) -r $@ $(ALL_DRUNTIME_OBJS)
 	$(RANLIB) $@
 
 #--------------------------------------#
@@ -570,6 +570,8 @@ install-exec-local: $(D_PREREQ_SRCS) libgdruntime.a
 	$(mkinstalldirs) $(DESTDIR)$(toolexeclibdir)
 	$(INSTALL) libgdruntime.a $(DESTDIR)$(toolexeclibdir)
 	$(RANLIB) $(DESTDIR)$(toolexeclibdir)/libgdruntime.a
+	$(INSTALL) $(CMAIN_OBJS) $(DESTDIR)$(toolexeclibdir)
+ 
 
 install-data-local: $(D_PREREQ_SRCS) libgdruntime.a
 	for i in core; do \

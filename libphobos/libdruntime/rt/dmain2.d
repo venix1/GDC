@@ -361,7 +361,8 @@ extern (C) bool rt_term(ExceptionHandler dg = null)
 /***********************************
  * The D main() function supplied by the user's program
  */
-int main(char[][] args);
+//int main(char[][] args);
+alias int function(char[][]) main_func;
 
 /***********************************
  * Substitutes for the C main() function.
@@ -369,7 +370,7 @@ int main(char[][] args);
  * function and catch any unhandled exceptions.
  */
 
-extern (C) int main(int argc, char** argv)
+extern (C) int _d_run_main(int argc, char** argv, main_func main)
 {
     char[][] args;
     int result;

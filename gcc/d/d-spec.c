@@ -58,6 +58,13 @@
 #define LIBPHOBOS_PROFILE LIBPHOBOS
 #endif
 
+#ifndef LIBPHOBOS_DMAIN
+#define LIBPHOBOS_DMAIN ":dmain.o"
+#endif
+#ifndef LIBPHOBOS_DMAIN_PROFILE
+#define LIBPHOBOS_DMAIN_PROFILE LIBPHOBOS_DMAIN
+#endif
+
 /* mingw and cygwin don't have pthread. %% TODO: check darwin.  */
 #if TARGET_WINDOS || TARGET_OSX || TARGET_ANDROID
 #define USE_PTHREADS	0
@@ -77,6 +84,10 @@ lang_specific_driver (struct cl_decoded_option **in_decoded_options,
 
   /* Used by -debuglib */
   int saw_debug_flag = 0;
+
+  /* Determines if 'dmain.o' should be linked.  This should be set to 0 if
+     an entrypoint other than 'main' is used. */
+  int include_dmain = 1;
 
   /* What do with libgphobos:
      -1 means we should not link in libgphobos
@@ -306,6 +317,19 @@ lang_specific_driver (struct cl_decoded_option **in_decoded_options,
 
 	      break;
 	    }
+           
+	/* Options that signify a non main entry point. */
+        case OPT_fno_dmain:
+        case OPT_shared:
+#if WINDOS
+        case OPT_mwindows:
+        case OPT_mdll:
+	
+#endif
+	    {
+              include_dmain = 0;
+              break;
+	    }
 	}
     }
 
@@ -420,6 +444,16 @@ lang_specific_driver (struct cl_decoded_option **in_decoded_options,
   /* Add `-lgphobos' if we haven't already done so.  */
   if (library > 0 && phobos)
     {
+      /* Add dmain.o as well. Must be added before phobos to properly resolve
+         symbols. */
+      if (include_dmain)
+      {
+          generate_option (OPT_l, saw_profile_flag ? LIBPHOBOS_DMAIN_PROFILE : LIBPHOBOS_DMAIN, 1,
+                           CL_DRIVER, &new_decoded_options[j]);
+          added_libraries++;
+          j++;
+      }
+
 #ifdef HAVE_LD_STATIC_DYNAMIC
       if (library > 1 && !static_link)
 	{
@@ -427,6 +461,7 @@ lang_specific_driver (struct cl_decoded_option **in_decoded_options,
 			   &new_decoded_options[j]);
 	  j++;
 	}
+
 #endif
 
       generate_option (OPT_l, saw_profile_flag ? LIBPHOBOS_PROFILE : LIBPHOBOS, 1,

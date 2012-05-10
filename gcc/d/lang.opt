@@ -190,6 +190,10 @@ static-libphobos
 Driver
 Link the standard D library statically in the compilation.
 
+fno-dmain
+Driver
+Do not link phobos dmain.o.
+
 Wall
 D
 ; Documented in c.opt
@@ -209,4 +213,3 @@ D
 Wunknown-pragmas
 D
 ; Documented in c.opt
-

@@ -109,7 +109,7 @@ RT_WINDOWS_OBJS=core/sys/windows/dbghelp.o core/sys/windows/dll.o \
 		core/sys/windows/windows.o
 
 # This should not be linked into a shared library.
-CMAIN_OBJS= #rt/cmain.o
+CMAIN_OBJS= rt/dmain.o
 
 D_GC_MODULES=@D_GC_MODULES@
 
@@ -173,6 +173,8 @@ install-exec-local: $(D_PREREQ_SRCS) libgdruntime.a
 	$(mkinstalldirs) $(DESTDIR)$(toolexeclibdir)
 	$(INSTALL) libgdruntime.a $(DESTDIR)$(toolexeclibdir)
 	$(RANLIB) $(DESTDIR)$(toolexeclibdir)/libgdruntime.a
+	$(INSTALL) $(CMAIN_OBJS) $(DESTDIR)$(toolexeclibdir)
+
 
 install-data-local: $(D_PREREQ_SRCS) libgdruntime.a
 	for i in core; do \
