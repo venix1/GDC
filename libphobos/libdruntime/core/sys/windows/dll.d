@@ -27,10 +27,24 @@ version( Windows )
 
     extern (C)
     {
-        extern __gshared void* _tlsstart;
-        extern __gshared void* _tlsend;
         extern __gshared int   _tls_index;
-        extern __gshared void* _tls_callbacks_a;
+
+        version (MinGW)
+        {
+            extern __gshared void* _tls_start;
+            extern __gshared void* _tls_end;
+            extern __gshared void* __xl_a;
+            
+            alias _tls_start _tlsstart;
+            alias _tls_end   _tlsend;
+            alias __xl_a     _tls_callbacks_a;
+        } 
+        else
+        {
+            extern __gshared void* _tlsstart;
+            extern __gshared void* _tlsend;
+            extern __gshared void* _tls_callbacks_a;
+        }
     }
 
     extern (C) // rt.minfo

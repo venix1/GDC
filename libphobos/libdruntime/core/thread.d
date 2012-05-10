@@ -146,6 +146,20 @@ version( Windows )
                 extern int _tlsend;
             }
         }
+        else version( MinGW)
+        {
+            // NOTE: The memory between the addresses of _tls_start and _tls_end
+            //       is the storage for thread-local data in MinGW.  Both of
+            //       these are defined in tlssup.c.
+            extern (C)
+            {
+                extern int _tls_start;
+                extern int _tls_end;
+            }
+            
+            alias _tls_start _tlsstart;
+            alias _tls_end _tlsend;
+        }
         else version( GNU )
         {
             extern (C)
