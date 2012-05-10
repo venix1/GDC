@@ -78,6 +78,7 @@ class Mutex :
             if( pthread_mutex_init( &m_hndl, &attr ) )
                 throw new SyncException( "Unable to initialize mutex" );
         }
+        
         m_proxy.link = this;
         this.__monitor = &m_proxy;
     }
@@ -112,6 +113,7 @@ class Mutex :
             int rc = pthread_mutex_destroy( &m_hndl );
             assert( !rc, "Unable to destroy mutex" );
         }
+        
         this.__monitor = null;
     }
 
@@ -198,6 +200,7 @@ private:
     {
         pthread_mutex_t     m_hndl;
     }
+    
 
     struct MonitorProxy
     {
