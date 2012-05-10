@@ -50,6 +50,10 @@ version (DigitalMarsC)
     }
     alias core.stdc.stdio._snprintf snprintf;
 }
+else version (MinGW)
+{
+    // use snprintf from stdio
+}
 else
 {
     // Use C99 snprintf

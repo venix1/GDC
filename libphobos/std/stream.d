@@ -1144,7 +1144,16 @@ class Stream : InputStream, OutputStream {
     size_t psize = buffer.length;
     size_t count;
     while (true) {
-      version (Windows) {
+      version (MinGW) {
+        count = vsnprintf(p, psize, f, args);
+        if (count == -1)
+          psize *= 2;
+        else if (count >= psize)
+          psize = count + 1;
+        else
+          break;
+        p = cast(char*) alloca(psize);
+      } else version (Windows) {
         count = _vsnprintf(p, psize, f, args);
         if (count != -1)
           break;

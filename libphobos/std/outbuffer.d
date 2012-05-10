@@ -266,7 +266,18 @@ class OutBuffer
         auto psize = buffer.length;
         for (;;)
         {
-            version(Win32)
+            version(MinGW)
+            {
+                count = vsnprintf(p,psize,f,args);
+                if (count == -1)
+                    psize *= 2;
+                else if (count >= psize)
+                    psize = count + 1;
+                else
+                    break;                    
+                p = cast(char *) alloca(psize); // buffer too small, try again with larger size
+            }
+            else version(Win32)
             {
                 count = _vsnprintf(p,psize,f,args);
                 if (count != -1)

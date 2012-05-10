@@ -106,7 +106,7 @@ RT_POSIX_OBJS=core/sys/posix/netinet/in_.o core/sys/posix/sys/select.o \
 
 RT_WINDOWS_OBJS=core/sys/windows/dbghelp.o core/sys/windows/dll.o \
 		core/sys/windows/stacktrace.o core/sys/windows/threadaux.o \
-		core/sys/windows/windows.o
+		core/sys/windows/windows.o core/sys/windows/mingwex.o
 
 # This should not be linked into a shared library.
 CMAIN_OBJS= rt/dmain.o
