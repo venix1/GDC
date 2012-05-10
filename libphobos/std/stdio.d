@@ -112,9 +112,50 @@ else version (MINGW_IO)
         int setmode(int, int);
     }
 
-    void flockfile(FILE* fp) { }
+    import core.sync.mutex;
+    
+    __gshared Mutex lockMutex;
+    __gshared Mutex[uint] fileLocks;
+    
+    void flockfile(FILE* fp)
+    {
+        Mutex mutex;
+        
+        if (lockMutex is null)
+             lockMutex = new Mutex;
+             
+        lockMutex.lock();
+        
+        if (fp._file in fileLocks)
+        {
+            mutex = fileLocks[fp._file];
+        } else 
+        {
+            mutex = new Mutex();
+            fileLocks[fp._file] = mutex;
+        }
+        mutex.lock();
+        
+        lockMutex.unlock();
+    }
 
-    void funlockfile(FILE* fp) { }
+    void funlockfile(FILE* fp)
+    {
+        Mutex mutex;
+
+        if (lockMutex is null)
+             lockMutex = new Mutex;
+        lockMutex.lock();
+        
+        if (fp._file in fileLocks)
+        {
+            mutex = fileLocks[fp._file];
+            mutex.unlock();
+        } else
+        { /* Should this be an error */ }
+        lockMutex.unlock();
+    }
+    
 
     int fputc_unlocked(int c, _iobuf* fp) { return fputc(c, cast(shared) fp); }
     int fputwc_unlocked(int c, _iobuf* fp)
