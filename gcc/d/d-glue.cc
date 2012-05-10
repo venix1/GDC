@@ -2812,6 +2812,23 @@ Module::genobjfile (int multiobj)
 	stest = g.ofile->doUnittestFunction ("*__modtest", &mi.unitTests)->toSymbol();
 
       genmoduleinfo();
+        
+#ifdef TARGET_DLLIMPORT_DECL_ATTRIBUTES
+      // Apply dllexport for ModuleInfo and dllimport for imports.
+      gen.addDeclAttribute(toSymbol()->Stree, "dllexport");
+
+      for (size_t i = 0; i < aimports.dim; i++)
+        {   
+          Module *m = aimports.tdata()[i];
+            
+          if (m->needmoduleinfo)
+            {   
+              Symbol *s = m->toSymbol();                
+              gen.addDeclAttribute(s->Stree, "dllimport");
+              DECL_DLLIMPORT_P(s->Stree) = 1;
+            }
+        }
+#endif        
     }
 
   g.ofile->endModule();
