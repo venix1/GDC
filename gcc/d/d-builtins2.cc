@@ -797,11 +797,21 @@ eval_builtin (Loc loc, BUILTIN builtin, Expressions *arguments)
       break;
 
     case BUILTINbsf:
-      callee = d_built_in_decls (BUILT_IN_CTZL);
+      callee = d_built_in_decls(BUILT_IN_CTZL);
+      if (t0->ty == Tint64 || t0->ty == Tuns64) 
+        callee = d_built_in_decls(BUILT_IN_CTZLL);
+      else if (t0->ty == Tint32 || t0->ty == Tuns32)
+        callee = d_built_in_decls(BUILT_IN_CTZL);
+      gcc_assert(callee);
       break;
 
     case BUILTINbsr:
-      callee = d_built_in_decls (BUILT_IN_CLZL);
+      callee = d_built_in_decls(BUILT_IN_CLZL);
+      if (t0->ty == Tint64 || t0->ty == Tuns64) 
+        callee = d_built_in_decls(BUILT_IN_CLZLL);
+      else if (t0->ty == Tint32 || t0->ty == Tuns32)
+        callee = d_built_in_decls(BUILT_IN_CLZL);
+      gcc_assert(callee);
       break;
 
     case BUILTINbswap:
