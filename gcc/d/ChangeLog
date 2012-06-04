@@ -1,3 +1,8 @@
+2012-06-04  Iain Buclaw  <ibuclaw@ubuntu.com>
+
+	* d-objfile.cc(ObjectFile::outputThunk): Output thunks moved back to
+	the frontend, as backend does not emit them for DECL_EXTERNAL functions.
+
 2012-02-01  Iain Buclaw  <ibuclaw@ubuntu.com>
 
 	* setup-gcc.sh: Remove -hg option.
