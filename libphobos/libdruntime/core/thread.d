@@ -146,7 +146,7 @@ version( Windows )
                 extern int _tlsend;
             }
         }
-        else version( MinGW)
+        else version( MinGW )
         {
             // NOTE: The memory between the addresses of _tls_start and _tls_end
             //       is the storage for thread-local data in MinGW.  Both of
@@ -3142,6 +3142,21 @@ private
             version = AlignFiberStackTo16Byte;
         }
     }
+    else version( GNU_InlineAsm )
+    {
+        version( MinGW64 )
+        {
+            version = GNU_AsmX86_64_Windows;
+            version = AlignFiberStackTo16Byte;
+        }
+        else version( MinGW )
+        {
+            version = GNU_AsmX86_Windows;
+            version = AlignFiberStackTo16Byte;
+        } 
+        
+        // Defaults to Posix
+    }
     else version( PPC )
     {
         version( Posix )
@@ -3320,6 +3335,92 @@ private
                 jmp RCX;
             }
         }
+        else version( GNU_AsmX86_Windows )
+        {
+            asm 
+            {   "
+                // save current stack state
+                // Standard prologue
+                //push %%EBP;
+                //mov  %%ESP, %%EBP;
+                push %%EDI;
+                push %%ESI;
+                push %%EBX;
+                push %%FS:0;
+                push %%FS:4;
+                push %%FS:8;
+                push %%EAX;
+
+                // store oldp again with more accurate address
+                mov 8(%%EBP), %%EAX;
+                mov %%ESP, (%%EAX);
+                // load newp to begin context switch
+                mov 12(%%EBP), %%ESP;
+
+                // load saved state from new stack
+                pop %%EAX;
+                pop %%FS:8;
+                pop %%FS:4;
+                pop %%FS:0;
+                pop %%EBX;
+                pop %%ESI;
+                pop %%EDI;
+                pop %%EBP;
+
+                // 'return' to complete switch
+                ret;
+                "
+                : /* outputs */
+                : /* inputs */
+                : /* clobbers */
+                ;
+            }
+        }
+        else version( GNU_AsmX86_64_Windows )
+        {
+            asm 
+            {   "
+                // save current stack state
+                // Standard prologue
+                //pushq %%RBP;
+                //movq  %%RSP, %%RBP;
+                pushq %%RBX;
+                pushq %%R12;
+                pushq %%R13;
+                pushq %%R14;
+                pushq %%R15;
+                pushq %%GS:0;
+                pushq %%GS:8;
+                pushq %%GS:16;
+
+                // store oldp
+                movq %%RSP, (%%RCX);
+                // load newp to begin context switch
+                movq %%RDX, %%RSP;
+
+                // load saved state from new stack
+                popq %%GS:16;
+                popq %%GS:8;
+                popq %%GS:0;
+                popq %%R15;
+                popq %%R14;
+                popq %%R13;
+                popq %%R12;
+                popq %%RBX;
+                popq %%RBP;
+
+                // 'return' to complete switch
+                popq %%RCX;
+                jmp *%%RCX;
+                "
+                : /* outputs */
+                : /* inputs */
+                : /* clobbers */ 
+                ;
+            }
+
+//            assert(false, "x86-64 stub");
+        }
         else version( AsmX86_Posix )
         {
             asm
@@ -3393,6 +3494,9 @@ private
             *oldp = &ucur;
             swapcontext( **(cast(ucontext_t***) oldp),
                           *(cast(ucontext_t**)  newp) );
+        } else
+        {
+            assert(0, "Fibers unsupported by platform");
         }
     }
 }
@@ -4118,6 +4222,46 @@ private:
                 push( cast(size_t) m_ctxt.bstack + m_size );        // GS:[16]
             }
         }
+        else version( GNU_AsmX86_Windows )
+        {
+            version( StackGrowsDown ) {} else static assert( false );
+
+            // Currently, MinGW doesn't utilize SEH exceptions.
+            // See DMD AsmX86_Windows If this code ever becomes fails and SEH is used.
+
+            push( 0x00000000 );                                     // Return address of fiber_entryPoint call
+            push( cast(size_t) &fiber_entryPoint );                 // EIP
+            push( 0x00000000 );                                     // EBP
+            push( 0x00000000 );                                     // EDI
+            push( 0x00000000 );                                     // ESI
+            push( 0x00000000 );                                     // EBX
+            push( 0xFFFFFFFF );                                     // FS:[0] - Current SEH frame
+            push( cast(size_t) m_ctxt.bstack );                     // FS:[4] - Top of stack
+            push( cast(size_t) m_ctxt.bstack - m_size );            // FS:[8] - Bottom of stack
+            push( 0x00000000 );                                     // EAX
+        }
+        else version( GNU_AsmX86_64_Windows )
+        {
+            push( 0x00000000_00000000 );                            // Return address of fiber_entryPoint call
+            push( cast(size_t) &fiber_entryPoint );                 // RIP
+            push( 0x00000000_00000000 );                            // RBP
+            push( 0x00000000_00000000 );                            // RBX
+            push( 0x00000000_00000000 );                            // R12
+            push( 0x00000000_00000000 );                            // R13
+            push( 0x00000000_00000000 );                            // R14
+            push( 0x00000000_00000000 );                            // R15
+            push( 0xFFFFFFFF_FFFFFFFF );                            // GS:[0] - Current SEH frame
+            version( StackGrowsDown )
+            {
+                push( cast(size_t) m_ctxt.bstack );                 // GS:[8]  - Top of stack
+                push( cast(size_t) m_ctxt.bstack - m_size );        // GS:[16] - Bottom of stack
+            }
+            else
+            {
+                push( cast(size_t) m_ctxt.bstack );                 // GS:[8]  - Top of stack
+                push( cast(size_t) m_ctxt.bstack + m_size );        // GS:[16] - Bottom of stack
+            }
+        }
         else version( AsmX86_Posix )
         {
             push( 0x00000000 );                                     // Return address of fiber_entryPoint call
@@ -4175,6 +4319,10 @@ private:
             // NOTE: If ucontext is being used then the top of the stack will
             //       be a pointer to the ucontext_t struct for that fiber.
             push( cast(size_t) &m_utxt );
+        }
+        else
+        {
+            assert(false, "Fibers not supported by platform");
         }
     }
 
