@@ -3247,7 +3247,17 @@ private
         obj.switchOut();
     }
 
-
+  // A cleaner method would be to set in function body.
+  // However, it's currently invalid.
+  version( GNU_AsmX86_Windows )
+  {
+    pragma(set_attribute, fiber_switchContext, __naked__);
+  }
+  else version( GNU_AsmX86_64_Windows )
+  {
+    pragma(set_attribute, fiber_switchContext, __naked__);
+  }
+  
   // NOTE: If AsmPPC_Posix is defined then the context switch routine will
   //       be defined externally until inline PPC ASM is supported.
   version( AsmPPC_Posix )
@@ -3340,9 +3350,8 @@ private
             asm 
             {   "
                 // save current stack state
-                // Standard prologue
-                //push %%EBP;
-                //mov  %%ESP, %%EBP;
+                push %%EBP;
+                mov  %%ESP, %%EBP;
                 push %%EDI;
                 push %%ESI;
                 push %%EBX;
@@ -3381,9 +3390,8 @@ private
             asm 
             {   "
                 // save current stack state
-                // Standard prologue
-                //pushq %%RBP;
-                //movq  %%RSP, %%RBP;
+                pushq %%RBP;
+                movq  %%RSP, %%RBP;
                 pushq %%RBX;
                 pushq %%R12;
                 pushq %%R13;
@@ -3418,8 +3426,6 @@ private
                 : /* clobbers */ 
                 ;
             }
-
-//            assert(false, "x86-64 stub");
         }
         else version( AsmX86_Posix )
         {
