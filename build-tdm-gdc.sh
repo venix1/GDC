@@ -1,8 +1,18 @@
 #!/bin/bash
 
-#Options
+# Default Options
 use_hg_revision=1
 stage="download"
+
+# Clean stage prior to resuming.  This means patching/configuring should be merge 
+# Reorder.  Extract/patching routine.  All files must be extracted then patched.
+# Convert to git revision
+
+
+# kill conftest.exe that's run for more than a minute
+# pthreadGC2_64.dll is missing
+# Update gccbuilder patch for disabling bootstrap
+
 
 # PATCH GMP with gmp-4.3.2-w64.patch
 # --with-local-prefix is required if not using winsup
@@ -10,9 +20,16 @@ stage="download"
 # libiconv is required
 
 # LPATH to avoid linking errors
-# Use stage file for selectin stages and options
-# Use commandline to override stage file
 # Need built binaries for the dlls in path.
+
+# Allow rebuilding of phobos only.
+
+# Dev mode.  Extract sources apply patches.  Ability to diff and generate new patches
+
+# parse commandline options
+# --shell{32,64}. Sets up environment used to compile target
+# --{stage} restarts process from stage
+
 
 # URL of all source prerequisits.
 sources=(
@@ -82,6 +99,8 @@ build_gdc()
        PATH=/crossdev/MinGW64/bin:/crossdev/MinGW64/x86_64-w64-mingw32/bin32:/bin
        export CC="gcc -m32"
        export CXX="g++ -m32"
+       # Disable optimizations
+       #find . -name Makefile -exec sed -i 's/-O2/-O0 -g3/g' {} \; -exec chmod 644 {} \;
        /crossdev/gccbuilder/build-tdm64.sh gcc $ARGS 2>&1 | tee build.log
    fi
    popd
@@ -108,7 +127,7 @@ mingw_sed()
 {
     sed -i $1 $2
     # sed -i is broken and will leave the file read-only
-    chmod 0777 $2
+    chmod +w $2
 }
 
 # Build global support libs.  This is done verbatim using TDM's scripts
@@ -363,14 +382,16 @@ package()
 # Patch source files.
 patch_sources()
 {
-    echo "" # avoid empty command.
+    set empty57abcdef
+    unset empty57abcdef
 }
 
 # Verifies a command is available and up to date.
 # require cmd [version]
 requires()
 {
-    echo "" # avoid empty command.
+    set empty57abcdef
+    unset empty57abcdef
 }
 
 setup_gdc_build()
@@ -402,7 +423,8 @@ setup_gdc_build()
     #patch -f -d $path/gcc-4.6.1/ -p1 < /crossdev/gccbuilder/eh_shmem.patch #??
     patch -f -d $path/gcc-4.6.1/ -p1 < /crossdev/gccbuilder/headerpath.patch
     #patch -f -d $path/gcc-4.6.1/ -p1 < /crossdev/gccbuilder/lfs.patch #C++
-    #patch -f -d $path/gcc-4.6.1/ -p1 < /crossdev/gccbuilder/libgcceh.patch # ??
+    # Required to avoid missing -lgcc_eh errors. 
+    patch -f -d $path/gcc-4.6.1/ -p1 < /crossdev/gccbuilder/libgcceh.patch
     patch -f -d $path/gcc-4.6.1/ -p1 < /crossdev/gccbuilder/libgomp.patch
     patch -f -d $path/gcc-4.6.1/ -p1 -f < /crossdev/gccbuilder/libs64.patch
     #patch -f -d $path/gcc-4.6.1/ -p1 < /crossdev/gccbuilder/lto-virtbase.patch#Fails
@@ -447,7 +469,7 @@ test_msys()
 
     requires unzip
     requires wget 
-    echo "" # avoid empty command.
+#    echo "" # avoid empty command.
 }
 
 #handle_options
@@ -455,55 +477,97 @@ test_msys()
 test_msys
 make_directory_layout
 
-#Stage 1, Download source and compilers.
-# Verify md5sum,s download fails
-# Acquire TDM source.
-for source in "${sources[@]}"; do
-    check_and_download $source
+if [ ! -e state ]; then
+    echo download > state
+fi
+
+while :
+do
+state=$(cat state)
+echo "Executing $state"
+case "$state" in
+    download )
+        # Clean downloads.
+        # Acquire TDM source.
+        for source in "${sources[@]}"; do
+            check_and_download $source
+        done
+
+        # Download lastest TDM 32 and 64 compilers.
+        for file in "${compilers[@]}"; do
+            check_and_download $file
+        done
+
+        # Other downloads.  Patches that are not incorporated into GDC yet.
+        for file in "${other[@]}"; do
+            check_and_download $file
+        done
+        
+        echo verify > state
+    ;;
+
+    verify )
+        # Verify md5sums, fail.
+        # for file in $(md5sum md5sum | grep fail); do rm $file; echo download > state; done
+        echo extract_global > state
+    ;;
+    
+# Begin support libraries
+    extract_global )
+        #extract_global_sources
+        echo patch_global > state
+    ;;
+    
+    patch_global )
+        #patch_global_sources
+        echo build_global > state
+    ;;
+    
+    build_global )
+        #build_global_sources
+        echo setup_gdc64 > state
+    ;;
+
+# Begin 32-bit compiler block
+        #setup_gdc_build "gdc/v1"
+        #build_gdc "gdc/v1"
+
+        #setup_gdc_build "gdc/v2"
+        #build_gdc "gdc/v2"
+
+        #test_compiler("gdc/d1")
+        #test_compiler("gdc/d2")
+
+        #package gdc
+
+# Begin 64-bit compiler block
+        # 64 bit -m64
+
+        # -dual
+        #setup_gdc_build "gdc64/v1"
+        #build_gdc "gdc64/v1"
+
+    setup_gdc64 )
+        setup_gdc_build "gdc64/v2"
+        echo build_gdc64 > state
+    ;;
+
+    build_gdc64 )
+        build_gdc "gdc64/v2"
+        echo package_gdc64 > state
+    ;;
+
+        #test_compiler("gdc64/d1")
+        #test_compiler("gdc64/d2")
+
+    package_gdc64 )
+        package gdc64
+        echo finish > state
+    ;;
+    
+    shell64 )
+    ;;
+    
+    * ) exit
+esac
 done
-
-# Download lastest TDM 32 and 64 compilers.
-for file in "${compilers[@]}"; do
-    check_and_download $file
-done
-
-# Other downloads.  Patches that are not incorporated into GDC yet.
-for file in "${other[@]}"; do
-    check_and_download $file
-done
-
-# Verify md5sums, fail.
-
-
-# Stage 2, Build support libraries
-extract_global_sources
-build_global_sources
-
-# Stage 3, Build all 4 variants of GDC.
-# Can be selected with build-string.
-
-# 32 bit -m32
-#setup_gdc_build "gdc/v1"
-#build_gdc "gdc/v1"
-
-#setup_gdc_build "gdc/v2"
-#build_gdc "gdc/v2"
-
-#test_compiler("gdc/d1")
-#test_compiler("gdc/d2")
-
-#package gdc
-
-# 64 bit -m64
-
-# -dual
-#setup_gdc_build "gdc64/v1"
-#build_gdc "gdc64/v1"
-
-setup_gdc_build "gdc64/v2"
-build_gdc "gdc64/v2"
-
-#test_compiler("gdc64/d1")
-#test_compiler("gdc64/d2")
-
-package gdc64
