@@ -1,5 +1,5 @@
-/* GDC -- D front-end for GCC
-   Copyright (C) 2004 David Friedman
+/* d-spec.c -- D frontend for GCC.
+   Copyright (C) 2011, 2012 Free Software Foundation, Inc.
 
    Modified by
     Iain Buclaw, (C) 2010, 2011

@@ -1,21 +1,21 @@
-// GDC -- D front-end for GCC
-// Copyright (C) 2010, 2011, 2012 Iain Buclaw
+/* d-lang.h -- D frontend for GCC.
+   Copyright (C) 2011, 2012 Free Software Foundation, Inc.
+ 
+   GCC is free software; you can redistribute it and/or modify it under
+   the terms of the GNU General Public License as published by the Free
+   Software Foundation; either version 3, or (at your option) any later
+   version.
+ 
+   GCC is distributed in the hope that it will be useful, but WITHOUT ANY
+   WARRANTY; without even the implied warranty of MERCHANTABILITY or
+   FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License
+   for more details.
+ 
+   You should have received a copy of the GNU General Public License
+   along with GCC; see the file COPYING3. If not see
+   <http://www.gnu.org/licenses/>.
+ */
 
-// This program is free software; you can redistribute it and/or modify
-// it under the terms of the GNU General Public License as published by
-// the Free Software Foundation; either version 2 of the License, or
-// (at your option) any later version.
-
-// This program is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU General Public License for more details.
-
-// You should have received a copy of the GNU General Public License
-// along with this program; if not, write to the Free Software
-// Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
-
-/* Same as d-lang.h, but updated to support GCC-4.5's new GTY(()) convention */
 
 #ifndef GCC_DCMPLR_DC_LANG_H
 #define GCC_DCMPLR_DC_LANG_H
@@ -204,27 +204,15 @@ extern "C" {
   tree pushdecl (tree);
   void pushlevel (int);
   tree poplevel (int, int, int);
-<<<<<<< HEAD
-  tree d_unsigned_type(tree);
-  tree d_signed_type(tree);
-  tree d_type_for_size(unsigned bits, int unsignedp);
-  tree d_type_for_mode(enum machine_mode mode, int unsignedp);
-  
-  void d_keep(tree t);
-  void d_free(tree t);
-  
-  int global_bindings_p (void);
-=======
   tree d_unsigned_type (tree);
   tree d_signed_type (tree);
   tree d_type_for_size (unsigned bits, int unsignedp);
   tree d_type_for_mode (enum machine_mode mode, int unsignedp);
-
+  
   void d_keep (tree t);
   void d_free (tree t);
-
-  bool global_bindings_p (void);
->>>>>>> 6c4d053... Re-format gdc glue code to GNU-style convention.
+  
+  int global_bindings_p (void);
   void insert_block (tree);
   void set_block (tree);
   tree getdecls (void);

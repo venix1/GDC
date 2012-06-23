@@ -1,5 +1,5 @@
-// GDC -- D front-end for GCC
-// Copyright (C) 2004 David Friedman
+// d-gcc-tree.h -- D frontend for GCC.
+// Copyright (C) 2011, 2012 Free Software Foundation, Inc.
 
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by

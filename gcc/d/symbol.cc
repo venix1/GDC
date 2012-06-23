@@ -1,23 +1,19 @@
-/* GDC -- D front-end for GCC
-   Copyright (C) 2004 David Friedman
+// symbol.cc -- D frontend for GCC.
+// Copyright (C) 2011, 2012 Free Software Foundation, Inc.
 
-   Modified by
-    Iain Buclaw, (C) 2010, 2011
+// GCC is free software; you can redistribute it and/or modify it under
+// the terms of the GNU General Public License as published by the Free
+// Software Foundation; either version 3, or (at your option) any later
+// version.
 
-   This program is free software; you can redistribute it and/or modify
-   it under the terms of the GNU General Public License as published by
-   the Free Software Foundation; either version 2 of the License, or
-   (at your option) any later version.
+// GCC is distributed in the hope that it will be useful, but WITHOUT ANY
+// WARRANTY; without even the implied warranty of MERCHANTABILITY or
+// FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
+// for more details.
 
-   This program is distributed in the hope that it will be useful,
-   but WITHOUT ANY WARRANTY; without even the implied warranty of
-   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-   GNU General Public License for more details.
-
-   You should have received a copy of the GNU General Public License
-   along with this program; if not, write to the Free Software
-   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
-*/
+// You should have received a copy of the GNU General Public License
+// along with GCC; see the file COPYING3.  If not see
+// <http://www.gnu.org/licenses/>.
 
 #include "symbol.h"
 #include "rmem.h"
@@ -26,17 +22,12 @@ Symbol::Symbol ()
 {
   Sident = 0;
   prettyIdent = 0;
-  //Stype = 0;
   Sclass = SC_INVALID;
   Sfl = FL_INVALID;
   Sseg = INVALID;
   Sflags = 0;
 
-  //Ssymnum = 0;
   Sdt = 0;
-
-  //Sstruct = 0;
-  //Sstructalign = 0;
 
   Stree = 0; // %% make it NULL-TREE, include d-gcc-include
   ScontextDecl = 0;

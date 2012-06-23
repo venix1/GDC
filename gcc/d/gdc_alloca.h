@@ -1,5 +1,5 @@
-// GDC -- D front-end for GCC
-// Copyright (C) 2007 David Friedman
+// gdc_alloca.h -- D frontend for GCC.
+// Copyright (C) 2011, 2012 Free Software Foundation, Inc.
 
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by

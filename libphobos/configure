@@ -4630,20 +4630,11 @@ else
 fi
 
 
-<<<<<<< HEAD
-# Check whether --enable-loader was given.
-if test "${enable_loader+set}" = set; then :
-  enableval=$enable_loader; :
-else
-  enable_loader=yes
-=======
-
 # Check whether --with-system-zlib was given.
 if test "${with_system_zlib+set}" = set; then :
   withval=$with_system_zlib; :
 else
   system_zlib=no
->>>>>>> cbd8b1c... Updated to D Frontend 2.059
 fi
 
 
