@@ -839,15 +839,8 @@ d_parse_file (void)
 {
   if (global.params.verbose)
     {
-      printf ("binary    %s\n", global.params.argv0);
-      printf ("version   %s\n", global.version);
-    }
-
-  if (global.params.verbose && asm_out_file == stdout)
-    {
-      // Really, driver should see the option and turn off -pipe
-      error ("Cannot use -fd-verbose with -pipe");
-      return;
+      fprintf (stdmsg, "binary    %s\n", global.params.argv0);
+      fprintf (stdmsg, "version   %s\n", global.version);
     }
 
   if (global.params.useUnitTests)
@@ -960,8 +953,6 @@ d_parse_file (void)
 
   gcc_assert (an_output_module);
 
-  //global.params.verbose = 1;
-
   // Read files
   aw = AsyncRead::create (modules.dim);
   for (size_t i = 0; i < modules.dim; i++)
@@ -976,7 +967,7 @@ d_parse_file (void)
     {
       m = modules[i];
       if (global.params.verbose)
-	printf ("parse     %s\n", m->toChars ());
+	fprintf (stdmsg, "parse     %s\n", m->toChars ());
       if (!Module::rootModule)
 	Module::rootModule = m;
       m->importedFrom = m;
@@ -1013,7 +1004,7 @@ d_parse_file (void)
 	  if (fonly_arg && m != an_output_module)
 	    continue;
 	  if (global.params.verbose)
-	    printf ("import    %s\n", m->toChars ());
+	    fprintf (stdmsg, "import    %s\n", m->toChars ());
 	  m->genhdrfile ();
 	}
     }
@@ -1026,7 +1017,7 @@ d_parse_file (void)
     {
       m = modules[i];
       if (global.params.verbose)
-	printf ("importall %s\n", m->toChars ());
+	fprintf (stdmsg, "importall %s\n", m->toChars ());
       m->importAll (0);
     }
 
@@ -1038,7 +1029,7 @@ d_parse_file (void)
     {
       m = modules[i];
       if (global.params.verbose)
-	printf ("semantic  %s\n", m->toChars ());
+	fprintf (stdmsg, "semantic  %s\n", m->toChars ());
       m->semantic ();
     }
 
@@ -1053,7 +1044,7 @@ d_parse_file (void)
     {
       m = modules[i];
       if (global.params.verbose)
-	printf ("semantic2 %s\n", m->toChars ());
+	fprintf (stdmsg, "semantic2 %s\n", m->toChars ());
       m->semantic2 ();
     }
 
@@ -1065,7 +1056,7 @@ d_parse_file (void)
     {
       m = modules[i];
       if (global.params.verbose)
-	printf ("semantic3 %s\n", m->toChars ());
+	fprintf (stdmsg, "semantic3 %s\n", m->toChars ());
       m->semantic3 ();
     }
 
@@ -1123,7 +1114,7 @@ d_parse_file (void)
       if (fonly_arg && m != an_output_module)
 	continue;
       if (global.params.verbose)
-	printf ("code      %s\n", m->toChars ());
+	fprintf (stdmsg, "code      %s\n", m->toChars ());
       if (! flag_syntax_only)
 	m->genobjfile (false);
       if (! global.errors && ! errorcount)
