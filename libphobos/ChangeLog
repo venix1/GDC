@@ -1,0 +1,5 @@
+2012-06-28  Daniel Green  <venix1@gmail.com>
+
+    * libdruntime/core/sys/windows/windows.d:  Interlocked* functions are 
+    compiler intrinsics.  Removed export qualifer to allow correct symbol
+    resolution.

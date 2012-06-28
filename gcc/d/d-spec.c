@@ -44,7 +44,9 @@
 /* This bit is set when the argument should not be passed to gcc or the backend */
 #define SKIPOPT		(1<<8)
 /* This bit is set if they did `-lws2_32'.  */
-#define WITHLIBWS2_32      (1<<9)
+#define WITHLIBWS2_32   (1<<9)
+/* This bit is set if they did `-luuid'.  */
+#define WITHLIBUUID     (1<<10)
 
 #ifndef MATH_LIBRARY
 #define MATH_LIBRARY "m"
@@ -128,6 +130,9 @@ lang_specific_driver (struct cl_decoded_option **in_decoded_options,
 
   /* "-lws2_32" if it appears on the command line.  */
   const struct cl_decoded_option *saw_libws2_32 = 0;
+
+  /* "-luuid" if it appears on the command line.  */
+  const struct cl_decoded_option *saw_libuuid = 0;  
 
   /* "-lc" if it appears on the command line.  */
   const struct cl_decoded_option *saw_libc = 0;
@@ -247,6 +252,8 @@ lang_specific_driver (struct cl_decoded_option **in_decoded_options,
 	    args[i] |= WITHLIBC;
           else if (strcmp (arg, "ws2_32") == 0)
             args[i] |= WITHLIBWS2_32;
+          else if (strcmp (arg, "uuid") == 0)
+            args[i] |= WITHLIBUUID;
 	  else
 	    /* Unrecognized libraries (e.g. -ltango) may require libphobos.  */
 	    library = (library == 0) ? 1 : library;
@@ -415,6 +422,12 @@ lang_specific_driver (struct cl_decoded_option **in_decoded_options,
           saw_libws2_32 = &decoded_options[i];
         }
 
+      if (!saw_libuuid && (args[i] & WITHLIBUUID) && library > 0)
+        {
+          --j;
+          saw_libuuid = &decoded_options[i];
+        }
+
       if (args[i] & D_SOURCE_FILE)
 	{
 	  if (only_source_option)
@@ -504,6 +517,19 @@ lang_specific_driver (struct cl_decoded_option **in_decoded_options,
       else if (library > 0)
         {
           generate_option (OPT_l, "ws2_32", 1, CL_DRIVER,
+                           &new_decoded_options[j]);
+          added_libraries++;
+          j++;        
+        }
+#endif
+
+      if (saw_libuuid)
+        new_decoded_options[j++] = *saw_libuuid;
+#if TARGET_WINDOWS
+      /* Phobos COM depend on libuuid.a */
+      else if (saw_libuuid && library > 0)
+        {
+          generate_option (OPT_l, "uuid", 1, CL_DRIVER,
                            &new_decoded_options[j]);
           added_libraries++;
           j++;        

@@ -1530,18 +1530,30 @@ export BOOL SwitchToThread();
 
 export
 {
-LONG  InterlockedIncrement(LPLONG lpAddend);
-LONG  InterlockedDecrement(LPLONG lpAddend);
-LONG  InterlockedExchange(LPLONG Target, LONG Value);
-LONG  InterlockedExchangeAdd(LPLONG Addend, LONG Value);
-PVOID InterlockedCompareExchange(PVOID *Destination, PVOID Exchange, PVOID Comperand);
-
 void InitializeCriticalSection(CRITICAL_SECTION * lpCriticalSection);
 void EnterCriticalSection(CRITICAL_SECTION * lpCriticalSection);
 BOOL TryEnterCriticalSection(CRITICAL_SECTION * lpCriticalSection);
 void LeaveCriticalSection(CRITICAL_SECTION * lpCriticalSection);
 void DeleteCriticalSection(CRITICAL_SECTION * lpCriticalSection);
+}
 
+version( Win64 )
+{
+    LONG  InterlockedIncrement(LPLONG lpAddend);
+    LONG  InterlockedDecrement(LPLONG lpAddend);
+    LONG  InterlockedExchange(LPLONG Target, LONG Value);
+    LONG  InterlockedExchangeAdd(LPLONG Addend, LONG Value);
+    PVOID InterlockedCompareExchange(PVOID *Destination, PVOID Exchange, PVOID Comperand);
+} else
+{
+    export 
+    {
+    LONG  InterlockedIncrement(LPLONG lpAddend);
+    LONG  InterlockedDecrement(LPLONG lpAddend);
+    LONG  InterlockedExchange(LPLONG Target, LONG Value);
+    LONG  InterlockedExchangeAdd(LPLONG Addend, LONG Value);
+    PVOID InterlockedCompareExchange(PVOID *Destination, PVOID Exchange, PVOID Comperand);
+    }
 }
 
 
