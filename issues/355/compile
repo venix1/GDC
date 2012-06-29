@@ -1,0 +1,5 @@
+#!/bin/sh
+# This should link without error.
+PATH=/c/MinGW64/bin:/c/MinGW64/x86_64-w64-mingw32/bin/:$PATH
+gdc -Wall -g -m64 -c issue355.d -o issue355.o
+gdc -o issue355.exe issue355.o -luuid -lole32 -ladvapi32 -lkernel32 -lmingwex -luser32
