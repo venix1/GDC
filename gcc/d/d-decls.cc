@@ -691,6 +691,17 @@ ClassDeclaration::toSymbol (void)
 
       TREE_CONSTANT (decl) = 0; // DMD puts this into .data, not .rodata...
       TREE_READONLY (decl) = 0;
+
+#if TARGET_WINDOWS && TARGET_DLLIMPORT_DECL_ATTRIBUTES
+      // Have to test for import first
+      if (isImportedSymbol())
+        {
+          gen.addDeclAttribute(decl, "dllimport");
+          DECL_DLLIMPORT_P(decl) = 1;
+        }
+      else if (isExport())
+        gen.addDeclAttribute(decl, "dllexport");
+#endif        
     }
   return csym;
 }
