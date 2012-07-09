@@ -109,7 +109,9 @@ D d: $(D_COMPILER_NAME)$(exeext) d/pkgvars
 # Tell GNU make to ignore these if they exist.
 .PHONY: D d
 
-D_BORROWED_C_OBJS=attribs.o
+D_BORROWED_C_OBJS = attribs.o
+D_EXTRA_LIBS = $(BACKENDLIBS)
+D_EXTRA_SPEC_LIBS = libcommon-target.a
 
 D_INCLUDES = -I$(srcdir)/d -I$(srcdir)/d/dfrontend -Id
 # -Wno-long-double is for MacOS X -- needs to be configurated
