@@ -20,7 +20,6 @@
 */
 
 /* This file is mostly a copy of gcc/c-common.c */
-
 #include "config.h"
 #include "system.h"
 #include "coretypes.h"
@@ -29,13 +28,13 @@
 #include "tree.h"
 #include "flags.h"
 #include "ggc.h"
-#include "vec.h"
-#include "diagnostic.h"
 #include "tm_p.h"
 #include "target.h"
 #include "langhooks.h"
 #include "tree-inline.h"
 #include "toplev.h"
+#include "diagnostic.h"
+#include "opts.h"
 #include "cgraph.h"
 
 #include "output.h"
@@ -433,7 +432,7 @@ d_builtin_function (tree decl)
 }
 
 
-/* Backend init  */
+/* Backend init.  */
 
 void
 gcc_d_backend_init (void)
@@ -510,6 +509,9 @@ gcc_d_backend_init (void)
   /* This is the C main, not the D main.  */
   main_identifier_node = get_identifier ("main");
 }
+
+
+/* Backend term.  */
 
 void
 gcc_d_backend_term (void)
