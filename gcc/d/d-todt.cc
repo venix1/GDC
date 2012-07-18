@@ -24,17 +24,17 @@
 dt_t **
 ComplexExp::toDt (dt_t **pdt)
 {
-  return dttree (pdt, toElem (& gen));
+  return dttree (pdt, toElem (&gen));
 }
 
 dt_t **
 IntegerExp::toDt (dt_t **pdt)
 {
-  return dttree (pdt, toElem (& gen));
+  return dttree (pdt, toElem (&gen));
 }
 
 dt_t **
 RealExp::toDt (dt_t **pdt)
 {
-  return dttree (pdt, toElem (& gen));
+  return dttree (pdt, toElem (&gen));
 }

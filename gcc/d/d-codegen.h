@@ -476,7 +476,7 @@ struct ListMaker
 
   ListMaker (void)
     : head(NULL_TREE),
-      ptail_(& this->head)
+      ptail_(&this->head)
   { }
 
   ListMaker (tree *alt_head)
@@ -552,7 +552,7 @@ class AggLayout : public FieldVisitor
   AggLayout (AggregateDeclaration *ini_agg_decl, tree ini_agg_type)
     : FieldVisitor(ini_agg_decl),
       aggType_(ini_agg_type),
-      fieldList_(& TYPE_FIELDS(this->aggType_))
+      fieldList_(&TYPE_FIELDS(this->aggType_))
   { }
 
   void doFields (VarDeclarations *fields, AggregateDeclaration *agg);
