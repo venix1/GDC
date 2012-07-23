@@ -33,6 +33,9 @@ stage="download"
 
 # URL of all source prerequisits.
 sources=(
+    "https://bitbucket.org/venix1/mingw-gdc/downloads/md5sum"
+    "https://bitbucket.org/venix1/mingw-gdc/downloads/curl-7.26.0-devel-mingw32.7z"
+    "https://bitbucket.org/venix1/mingw-gdc/downloads/curl-7.26.0-devel-mingw64.7z"
     "https://bitbucket.org/venix1/mingw-gdc/downloads/binutils-2.21.53-1-mingw32-src.tar.lzma"
     "https://bitbucket.org/venix1/mingw-gdc/downloads/gcc-4.6.1-tdmsrc-2.zip"
     "https://bitbucket.org/venix1/mingw-gdc/downloads/gmp-4.3.2.tar.bz2"
@@ -96,10 +99,19 @@ build_gdc()
    else
        echo "Building MinGW64"
        # x86_64-w64-mingw32/bin contains support dlls
-       PATH=/crossdev/MinGW64/bin:/crossdev/MinGW64/x86_64-w64-mingw32/bin32:/bin
+       PATH=/crossdev/MinGW64/bin:/crossdev/MinGW64/x86_64-w64-mingw32/bin32:/crossdev/MinGW64/x86_64-w64-mingw32/bin:/bin
+       
+       # Build sqlite
+       pushd sqlite-amalgamation-3071100/
+       
+       gcc -m32 -o sqlite3_32.o -c sqlite3.c
+       gcc -m64 -o sqlite3_64.o -c sqlite3.c
+       
+       popd
+       
        export CC="gcc -m32"
        export CXX="g++ -m32"
-       # Disable optimizations
+       # --debug Disable optimizations.
        #find . -name Makefile -exec sed -i 's/-O2/-O0 -g3/g' {} \; -exec chmod 644 {} \;
        /crossdev/gccbuilder/build-tdm64.sh gcc $ARGS 2>&1 | tee build.log
    fi
@@ -117,8 +129,8 @@ check_and_download()
     if [ ! -e "src/$file" ]; then
         echo "Downloading $file"
         wget --no-check-certificate $url -P src &> /dev/null 
-    else
-        echo "Not downloading $file, already exists."
+#    else
+#        echo "Not downloading $file, already exists."
     fi
 }
 
@@ -146,11 +158,6 @@ build_global_sources()
     PATH=/crossdev/MinGW64/bin:/bin:/usr/bin
     ./build-tdm64.sh binutils runtime support-libs prefix
     
-    # 32 bit and 64 bit versions
-    # Build zlib? Part of phobos already.
-    # Build sqlite
-    # Build curl
-
     popd
 }
 
@@ -224,8 +231,7 @@ extract_global_sources()
     tar --lzma -xf src/gcc-4.6.1-tdm64-1-c++.tar.lzma -C /crossdev/MinGW64
     #tar --lzma -xf src/gcc-4.6.1-tdm64-1-openmp.tar.lzma -C /crossdev/MinGW64
     
-    # Sed makefile to change --enagle-langauges
-
+    # Sed makefile to change --enagle-langauges 
 }
 
 # Create directory layout required to build
@@ -360,7 +366,25 @@ package()
         cp /crossdev/binutils-stage-tdm64/$ARCH/bin/as.exe $1/release/$ARCH/bin        
         # pe & pep file  
         cp /crossdev/binutils-stage-tdm64/$ARCH/lib/ldscripts/* $1/release/$ARCH/lib/ldscripts        
+        
+        # Merge sqlite_ARCH into libgphobos.a
+        ar q $1/release/lib32/libgphobos2.a $1/v2/sqlite-amalgamation-3071100/sqlite3_32.o
+        ar q $1/release/lib/libgphobos2.a   $1/v2/sqlite-amalgamation-3071100/sqlite3_64.o
+        
+        # Copy libcurl files to release
+        cp -rf $1/v2/curl-7.26.0-devel-mingw32/bin/* $1/release/x86_64-w64-mingw32/bin32
+        cp -r $1/v2/curl-7.26.0-devel-mingw32/include/* $1/release/x86_64-w64-mingw32/include
+        cp -r $1/v2/curl-7.26.0-devel-mingw32/lib/* $1/release/x86_64-w64-mingw32/lib32
+        mkdir -p $1/release/libcurl32/
+        cp $1/v2/curl-7.26.0-devel-mingw32/* $1/release/libcurl32/
+
+        cp -r $1/v2/curl-7.26.0-devel-mingw64/bin/* $1/release/x86_64-w64-mingw32/bin
+        cp -r $1/v2/curl-7.26.0-devel-mingw64/include/* $1/release/x86_64-w64-mingw32/include/
+        cp -r $1/v2/curl-7.26.0-devel-mingw64/lib64/* $1/release/x86_64-w64-mingw32/lib/
+        mkdir -p $1/release/libcurl64/
+        cp $1/v2/curl-7.26.0-devel-mingw64/* $1/release/libcurl64/
     fi
+    
     #Compile gdmd for use outside msys.
     #pp gdmd
 
@@ -398,20 +422,27 @@ setup_gdc_build()
 {
     path=/crossdev/$1
     version=`basename $path`
+    
+    rm -rf "$path/*"
+    
     # Extract GCC
     tar -xjf src/gcc-core-4.6.1.tar.bz2 -C $path
-
-    # Copy D files into GCC
-#    cp -rf gcc libphobos update-gcc.sh $path/gcc-4.6.1/
     
+    # Extract sqlite, curl libraries
+    unzip -o src/sqlite-amalgamation-3071100.zip -d $path &> /dev/null   
+    unzip -o src/curl-7.26.0-devel-mingw32.zip -d $path &> /dev/null
+    unzip -o src/curl-7.26.0-devel-mingw64.zip -d $path &> /dev/null
+   
     # Grab repository information
     if ! command -v hg &> /dev/null; then
         use_hg_revision=0
-    else        
-        hg_branch=`hg  identify -b`        
-        hg_revision=`hg identify -n | sed -e 's/^\(.*\)+$/\1/'`
-        hg_id=`hg identify -i | sed -e 's/^\(.*\)+$/\1/'`
-    fi    
+    fi
+    
+    #if [ $use_hg_revision ]; then
+        #hg_branch=`hg  identify -b`        
+        #hg_revision=`hg identify -n | sed -e 's/^\(.*\)+$/\1/'`
+        #hg_id=`hg identify -i | sed -e 's/^\(.*\)+$/\1/'`
+    #fi    
     
     # Apply third party patches
     patch -d $path/gcc-4.6.1/ -p1 < patches/mingw-tls-gcc-4.6.x.patch
@@ -433,27 +464,27 @@ setup_gdc_build()
     
     
     # Setup D
-    ./update-gcc.sh --setup $path/gcc-4.6.1
+    ./update-mingw.sh $path/gcc-4.6.1 --setup
     pushd $path/gcc-4.6.1
     chmod 0777 gcc/DEV-PHASE # sed has a permission issue
     
     # Since links are difficult on Windows, especially with Vista and 7.  -hg
     # is not used with this build process.
-    if test "$use_hg_revision" = 1; then
-        gdc_ver="hg r$hg_revision:$hg_id($hg_branch)"
-        dmd_ver=`grep 'version = "v' gcc/d/dfrontend/mars.c | sed -e 's/^.*"v\(.*\)".*$/\1/'` || exit 1
-        gdc_ver_msg="gdc $gdc_ver, using dmd $dmd2_ver"
+    #if test "$use_hg_revision" = 1; then
+        #gdc_ver="hg r$hg_revision:$hg_id($hg_branch)"
+        #dmd_ver=`grep 'version = "v' gcc/d/dfrontend/mars.c | sed -e 's/^.*"v\(.*\)".*$/\1/'` || exit 1
+        #gdc_ver_msg="gdc $gdc_ver, using dmd $dmd2_ver"
     
-        chmod 0777 gcc/DEV-PHASE # sed has a permission issue
-        sed -i 's/gdc [a-z0-9. :]*, using dmd [0-9. ]*//g' gcc/DEV-PHASE
-        chmod 0777 gcc/DEV-PHASE # sed has a permission issue
-        cur_DEV_PHASE=`cat gcc/DEV-PHASE`
-        if test -z "$cur_DEV_PHASE"; then
-            echo "$gdc_ver_msg" > gcc/DEV-PHASE
-        else
-            echo "$cur_DEV_PHASE $gdc_ver_msg" > gcc/DEV-PHASE
-        fi              
-    fi
+        #chmod 0777 gcc/DEV-PHASE # sed has a permission issue
+        #sed -i 's/gdc [a-z0-9. :]*, using dmd [0-9. ]*//g' gcc/DEV-PHASE
+        #chmod 0777 gcc/DEV-PHASE # sed has a permission issue
+        #cur_DEV_PHASE=`cat gcc/DEV-PHASE`
+        #if test -z "$cur_DEV_PHASE"; then
+            #echo "$gdc_ver_msg" > gcc/DEV-PHASE
+        #else
+            #echo "$cur_DEV_PHASE $gdc_ver_msg" > gcc/DEV-PHASE
+        #fi              
+    #fi
     
     popd
 }
@@ -487,6 +518,7 @@ state=$(cat state)
 echo "Executing $state"
 case "$state" in
     download )
+        rm src/md5sum
         # Clean downloads.
         # Acquire TDM source.
         for source in "${sources[@]}"; do
@@ -508,8 +540,24 @@ case "$state" in
 
     verify )
         # Verify md5sums, fail.
-        # for file in $(md5sum md5sum | grep fail); do rm $file; echo download > state; done
-        echo extract_global > state
+        success=1
+        cd ./src/
+        for file in $(md5sum -c md5sum | grep FAILED | cut -d: -f1); do
+            echo "Checksum failure for $file. Removing $file"
+            rm $file; 
+            success=0
+        done
+        cd ..
+        
+        if [ "$success" == 1 ]; then
+            # success move to next stage
+            echo extract_global > state
+        else
+            # Failed, redownload and exit.
+            echo "Failed verifying file checksums.  Please try again"
+            echo download > state;
+            exit 0;
+        fi          
     ;;
     
 # Begin support libraries
