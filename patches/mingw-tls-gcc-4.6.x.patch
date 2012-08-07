@@ -14,7 +14,7 @@ diff -rup gcc-4.6.1.original//gcc/config/i386/i386.c gcc-4.6.1/gcc/config/i386/i
 +{
 +  const char *sname;
 +  
-+  if (!DECL_THREAD_LOCAL_P(decl))
++  if (TREE_CODE(decl) != VAR_DECL || !DECL_THREAD_LOCAL_P(decl))
 +      return default_select_section(decl, reloc, align);
 +
 +  /* $GCC is required for symbol ordering. */
