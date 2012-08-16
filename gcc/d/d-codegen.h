@@ -366,7 +366,6 @@ struct IRState : IRBase
 
   TemplateEmission emitTemplates;
   bool splitDynArrayVarArgs;
-  bool useBuiltins;
   bool stdInc;
 
   // Variables that are in scope that will need destruction later
