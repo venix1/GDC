@@ -784,6 +784,10 @@ all-local: libgphobos2.a
 	$(GDC) -o $@ $(ALL_DFLAGS) -c $<
 
 # %.o : %.c
+zlib/%.o: $(top_srcdir)/../zlib/%.c
+	@test -d zlib || mkdir -p zlib
+	$(CC) -o $@ $(OUR_CFLAGS) $(CFLAGS) -c $<
+
 # Use .c.o to override Automake
 .c.o:
 	$(CC) -o $@ $(OUR_CFLAGS) $(CFLAGS) -c $<
