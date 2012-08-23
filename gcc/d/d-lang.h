@@ -163,12 +163,8 @@ extern GTY(()) tree d_global_trees[DTI_MAX];
 #ifdef __cplusplus
 /* In d-lang.cc.  These are called through function pointers
    and do not need to be "extern C". */
-bool d_mark_addressable (tree);
-void d_mark_exp_read (tree);
 tree d_truthvalue_conversion (tree);
-
 void d_add_global_declaration (tree);
-
 tree d_type_promotes_to (tree);
 
 struct Module;

@@ -19,7 +19,6 @@
    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 */
 
-/* This file is mostly a copy of gcc/c-common.c */
 #include "config.h"
 #include "system.h"
 #include "coretypes.h"
