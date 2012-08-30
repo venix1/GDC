@@ -190,7 +190,7 @@ struct IRState : IRBase
   tree maybeExprVar (tree exp, tree *out_var);
   void expandDecl (tree t_decl);
 
-  tree var (VarDeclaration *v);
+  tree var (Declaration *decl);
 
   // ** Type conversion
 
