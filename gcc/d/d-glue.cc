@@ -2844,11 +2844,7 @@ d_genericize(tree fndecl)
     }
 
     // Build cgraph for function.
-#if D_GCC_VER >= 47
-    cgraph_get_create_node(fndecl);
-#else
     (void) cgraph_node(fndecl);
-#endif
 
     // Maybe set original decl context back to true context
     if (D_DECL_STATIC_CHAIN(fndecl))
@@ -4831,15 +4827,9 @@ gcc_d_backend_init()
     // This allows the code in d-builtins2 to not have to worry about
     // converting (C signed char *) to (D char *) for string arguments of
     // built-in functions.
-#if D_GCC_VER >= 47
-    build_common_tree_nodes (/*signed_char*/false, /*short_double*/false);
-#else
+    
     // This is required or we'll crash pretty early on. %%log
-#if D_GCC_VER >= 46
     build_common_tree_nodes (/*signed_char*/false);
-#else
-    build_common_tree_nodes (/*signed_char*/false, /*short_double*/false);
-#endif
 
     // This is also required (or the manual equivalent) or crashes
     // will occur later
@@ -4852,7 +4842,6 @@ gcc_d_backend_init()
     // need this for void.. %% but this crashes... probably need to impl
     // some things in dc-lang.cc
     build_common_tree_nodes_2 (0 /* %% support the option */);
-#endif
 
     // Specific to D (but so far all taken from C)
     d_void_zero_node = make_node(INTEGER_CST);

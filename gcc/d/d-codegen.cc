@@ -4091,13 +4091,8 @@ IRState::doCase(tree t_value, tree t_label)
     else
 #endif
     {
-#if D_GCC_VER >= 47
-        tree t_case = build_case_label(t_value, NULL_TREE, t_label);
-        addExp(t_case);
-#else
         addExp(build3(CASE_LABEL_EXPR, void_type_node,
                     t_value, NULL_TREE, t_label));
-#endif
     }
 }
 

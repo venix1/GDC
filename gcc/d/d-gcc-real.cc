@@ -28,9 +28,7 @@
 #include "d-lang.h"
 #include "d-codegen.h"
 
-#if D_GCC_VER >= 46
 #define REAL_VALUE_NEGATE(X)  real_value_negate(&(X))
-#endif
 
 static enum machine_mode
 max_float_mode()

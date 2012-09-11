@@ -469,7 +469,6 @@ d_gcc_magic_builtins_module(Module *m)
         funcs->push(new AliasDeclaration(0, Lexer::idPool(name), dt));
     }
 
-#if D_GCC_VER >= 46
     /* Iterate through the target-specific builtin types for va_list. */
     if (targetm.enum_va_list_p)
     {
@@ -487,7 +486,6 @@ d_gcc_magic_builtins_module(Module *m)
             funcs->push(new AliasDeclaration(0, Lexer::idPool(name), dt));
         }
     }
-#endif
 
     for (size_t i = 0; i < builtin_converted_decls.dim ; ++i)
     {

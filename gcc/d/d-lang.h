@@ -20,11 +20,7 @@
 #ifndef GCC_DCMPLR_DC_LANG_H
 #define GCC_DCMPLR_DC_LANG_H
 
-#if D_GCC_VER == 45
-#include "d-lang-type-45.h"
-#else
 #include "d-lang-type.h"
-#endif
 
 /* Nothing is added to tree_identifier; */
 struct GTY(()) lang_identifier
@@ -216,11 +212,7 @@ extern "C" {
   void d_keep(tree t);
   void d_free(tree t);
   
-#if D_GCC_VER >= 47
-  bool global_bindings_p (void);
-#else
   int global_bindings_p (void);
-#endif
   void insert_block (tree);
   void set_block (tree);
   tree getdecls (void);
@@ -248,10 +240,6 @@ extern GTY(()) tree d_keep_list;
 
 #define d_warning(option, ...) warning(option, __VA_ARGS__)
 
-#if D_GCC_VER >= 47
-#define d_built_in_decls(FCODE) builtin_decl_explicit(FCODE)
-#else
 #define d_built_in_decls(FCODE) built_in_decls[FCODE]
-#endif
 
 #endif

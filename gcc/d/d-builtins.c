@@ -31,11 +31,7 @@
 #include "output.h"
 #include "rtl.h"
 #include "ggc.h"
-#if D_GCC_VER >= 46
 #include "vec.h"
-#else
-#include "varray.h"
-#endif
 #include "expr.h"
 #include "diagnostic.h"
 #include "tm_p.h"
@@ -44,21 +40,10 @@
 #include "tree-inline.h"
 #include "toplev.h"
 #include "cgraph.h"
-#if D_GCC_VER >= 47
-#include "common/common-target.h"
-#endif
 
 #include "d-lang.h"
 
-#if D_GCC_VER == 45
-#include "d-bi-attrs-45.h"
-#elif D_GCC_VER == 46
 #include "d-bi-attrs-46.h"
-#elif D_GCC_VER == 47
-#include "d-bi-attrs-47.h"
-#else
-#error "Version of GCC is not supported."
-#endif
 
 /* Used to help initialize the builtin-types.def table.  When a type of
    the correct size doesn't exist, use error_mark_node instead of NULL.
@@ -160,13 +145,9 @@ do_build_builtin_fn(enum built_in_function fncode,
     decl = add_builtin_function(name, fntype, fncode, fnclass,
             fallback_p ? libname : NULL, fnattrs);
 
-#if D_GCC_VER >= 47
-    set_builtin_decl(fncode, decl, implicit_p);
-#else
     built_in_decls[(int) fncode] = decl;
     if (implicit_p)
         implicit_built_in_decls[(int) fncode] = decl;
-#endif
 }
 
 enum d_builtin_type
