@@ -1388,6 +1388,7 @@ Optional Features:
 Optional Packages:
   --with-PACKAGE[=ARG]    use PACKAGE [ARG=yes]
   --without-PACKAGE       do not use PACKAGE (same as --with-PACKAGE=no)
+  --with-system-zlib      use installed libz (default: no)
   --with-cross-host=HOST  configuring with a cross compiler
 
 Some influential environment variables:
@@ -4630,6 +4631,7 @@ else
 fi
 
 
+
 # Check whether --with-system-zlib was given.
 if test "${with_system_zlib+set}" = set; then :
   withval=$with_system_zlib; :
@@ -4748,9 +4750,9 @@ BUILD_LIBIBERTY="../$BUILD_LIBIBERTY"
 # will have to modify gcc/configure.ac ..
 # For now, basic workaround for cross compilers ..
 if test "${host}" != "${build}"; then
-    gdc_include_dir='${libdir}/gcc/${host_alias}'/${d_gcc_ver}/include/d2
+    gdc_include_dir='${libdir}/gcc/${host_alias}'/${d_gcc_ver}/include/d
 else
-    gdc_include_dir='${prefix}'/include/d2/${d_gcc_ver}
+    gdc_include_dir='${prefix}'/include/d/${d_gcc_ver}
 fi
 
 

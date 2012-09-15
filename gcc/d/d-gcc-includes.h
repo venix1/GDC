@@ -59,7 +59,7 @@ extern "C" {
 #include "vec.h"
 
 #include "tree-pretty-print.h"
-#include "common/common-target.h"
+#include "output.h"
 #ifdef __cplusplus
 }
 #endif
