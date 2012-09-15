@@ -16,6 +16,31 @@
 
 load_lib gcc-dg.exp
 
+# Not available in GCC 4.6
+
+# Like dg-options, but adds to the default options rather than replacing them.
+
+proc dg-additional-options { args } {
+    upvar dg-extra-tool-flags extra-tool-flags
+
+    if { [llength $args] > 3 } {
+        error "[lindex $args 0]: too many arguments"
+        return
+    }
+
+    if { [llength $args] >= 3 } {
+        switch [dg-process-target [lindex $args 2]] {
+            "S" { eval lappend extra-tool-flags [lindex $args 1] }
+            "N" { }
+            "F" { error "[lindex $args 0]: `xfail' not allowed here" }
+            "P" { error "[lindex $args 0]: `xfail' not allowed here" }
+        }
+    } else {
+        eval lappend extra-tool-flags [lindex $args 1]
+    }
+}
+
+
 # Define go callbacks for dg.exp.
 
 proc gdc-dg-test { prog do_what extra_tool_flags } {
