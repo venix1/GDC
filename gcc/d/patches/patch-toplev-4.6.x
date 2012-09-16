@@ -1,6 +1,8 @@
-diff -pu gcc-4.6.2~/configure gcc-4.6.2/configure
---- gcc-4.6.2~/configure	2011-06-27 21:54:59.000000000 +0100
-+++ gcc-4.6.2/configure	2012-01-10 21:58:14.363416891 +0000
+Common subdirectories: gcc-4.6.3~/boehm-gc and gcc-4.6.3/boehm-gc
+Common subdirectories: gcc-4.6.3~/config and gcc-4.6.3/config
+diff -pu gcc-4.6.3~/configure gcc-4.6.3/configure
+--- gcc-4.6.3~/configure	2011-12-18 04:03:44.000000000 -0600
++++ gcc-4.6.3/configure	2012-09-16 05:37:20.381129619 -0500
 @@ -2719,7 +2719,8 @@ target_libraries="target-libgcc \
  		${libgcj} \
  		target-libobjc \
@@ -11,9 +13,9 @@ diff -pu gcc-4.6.2~/configure gcc-4.6.2/configure
  
  # these tools are built using the target libraries, and are intended to
  # run only in the target environment
-diff -pu gcc-4.6.2~/configure.ac gcc-4.6.2/configure.ac
---- gcc-4.6.2~/configure.ac	2011-06-27 21:54:59.000000000 +0100
-+++ gcc-4.6.2/configure.ac	2012-01-10 21:58:14.367416891 +0000
+diff -pu gcc-4.6.3~/configure.ac gcc-4.6.3/configure.ac
+--- gcc-4.6.3~/configure.ac	2011-11-18 05:45:44.000000000 -0600
++++ gcc-4.6.3/configure.ac	2012-09-16 05:37:20.383128619 -0500
 @@ -200,7 +200,8 @@ target_libraries="target-libgcc \
  		${libgcj} \
  		target-libobjc \
@@ -24,9 +26,9 @@ diff -pu gcc-4.6.2~/configure.ac gcc-4.6.2/configure.ac
  
  # these tools are built using the target libraries, and are intended to
  # run only in the target environment
-diff -pu gcc-4.6.2~/Makefile.def gcc-4.6.2/Makefile.def
---- gcc-4.6.2~/Makefile.def	2011-06-27 21:54:59.000000000 +0100
-+++ gcc-4.6.2/Makefile.def	2012-01-10 21:58:14.367416891 +0000
+diff -pu gcc-4.6.3~/Makefile.def gcc-4.6.3/Makefile.def
+--- gcc-4.6.3~/Makefile.def	2012-01-02 05:02:10.000000000 -0600
++++ gcc-4.6.3/Makefile.def	2012-09-16 05:37:47.127748921 -0500
 @@ -160,6 +160,7 @@ target_modules = { module= libquadmath;
  target_modules = { module= libgfortran; };
  target_modules = { module= libobjc; };
@@ -35,9 +37,18 @@ diff -pu gcc-4.6.2~/Makefile.def gcc-4.6.2/Makefile.def
  target_modules = { module= libtermcap; no_check=true;
                     missing=mostlyclean;
                     missing=clean;
-diff -pu gcc-4.6.2~/Makefile.in gcc-4.6.2/Makefile.in
---- gcc-4.6.2~/Makefile.in	2011-06-27 21:54:59.000000000 +0100
-+++ gcc-4.6.2/Makefile.in	2012-01-10 21:58:14.399416890 +0000
+@@ -599,6 +600,8 @@ languages = { language=objc;	gcc-check-t
+ languages = { language=obj-c++;	gcc-check-target=check-obj-c++; };
+ languages = { language=go;	gcc-check-target=check-go;
+ 				lib-check-target=check-target-libgo; };
++languages = { language=d;	gcc-check-target=check-d;
++				lib-check-target=check-target-libphobos; };
+ 
+ // Toplevel bootstrap
+ bootstrap_stage = { id=1 ; };
+diff -pu gcc-4.6.3~/Makefile.in gcc-4.6.3/Makefile.in
+--- gcc-4.6.3~/Makefile.in	2012-01-02 05:02:10.000000000 -0600
++++ gcc-4.6.3/Makefile.in	2012-09-16 05:38:54.000000000 -0500
 @@ -963,6 +963,7 @@ configure-target:  \
      maybe-configure-target-libgfortran \
      maybe-configure-target-libobjc \
@@ -646,7 +657,22 @@ diff -pu gcc-4.6.2~/Makefile.in gcc-4.6.2/Makefile.in
  .PHONY: configure-target-libtermcap maybe-configure-target-libtermcap
  maybe-configure-target-libtermcap:
  @if gcc-bootstrap
-@@ -59709,6 +60184,7 @@ configure-target-libquadmath: stage_last
+@@ -57724,6 +58199,14 @@ check-gcc-go:
+ 	(cd gcc && $(MAKE) $(GCC_FLAGS_TO_PASS) check-go);
+ check-go: check-gcc-go check-target-libgo
+ 
++.PHONY: check-gcc-d check-d
++check-gcc-d:
++	r=`${PWD_COMMAND}`; export r; \
++	s=`cd $(srcdir); ${PWD_COMMAND}`; export s; \
++	$(HOST_EXPORTS) \
++	(cd gcc && $(MAKE) $(GCC_FLAGS_TO_PASS) check-d);
++check-d: check-gcc-d check-target-libphobos
++
+ 
+ # Install the gcc headers files, but not the fixed include files,
+ # which Cygnus is not allowed to distribute.  This rule is very
+@@ -59709,6 +60192,7 @@ configure-target-libquadmath: stage_last
  configure-target-libgfortran: stage_last
  configure-target-libobjc: stage_last
  configure-target-libgo: stage_last
@@ -654,7 +680,7 @@ diff -pu gcc-4.6.2~/Makefile.in gcc-4.6.2/Makefile.in
  configure-target-libtermcap: stage_last
  configure-target-winsup: stage_last
  configure-target-libgloss: stage_last
-@@ -59739,6 +60215,7 @@ configure-target-libquadmath: maybe-all-
+@@ -59739,6 +60223,7 @@ configure-target-libquadmath: maybe-all-
  configure-target-libgfortran: maybe-all-gcc
  configure-target-libobjc: maybe-all-gcc
  configure-target-libgo: maybe-all-gcc
@@ -662,7 +688,7 @@ diff -pu gcc-4.6.2~/Makefile.in gcc-4.6.2/Makefile.in
  configure-target-libtermcap: maybe-all-gcc
  configure-target-winsup: maybe-all-gcc
  configure-target-libgloss: maybe-all-gcc
-@@ -60576,6 +61053,7 @@ configure-target-libquadmath: maybe-all-
+@@ -60577,6 +61062,7 @@ configure-target-libquadmath: maybe-all-
  configure-target-libgfortran: maybe-all-target-libgcc
  configure-target-libobjc: maybe-all-target-libgcc
  configure-target-libgo: maybe-all-target-libgcc
@@ -670,7 +696,7 @@ diff -pu gcc-4.6.2~/Makefile.in gcc-4.6.2/Makefile.in
  configure-target-libtermcap: maybe-all-target-libgcc
  configure-target-winsup: maybe-all-target-libgcc
  configure-target-libgloss: maybe-all-target-libgcc
-@@ -60608,6 +61086,8 @@ configure-target-libobjc: maybe-all-targ
+@@ -60609,6 +61095,8 @@ configure-target-libobjc: maybe-all-targ
  
  configure-target-libgo: maybe-all-target-newlib maybe-all-target-libgloss
  
