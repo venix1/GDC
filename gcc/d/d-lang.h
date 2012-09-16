@@ -209,7 +209,7 @@ void d_init_exceptions (void);
 void d_keep (tree t);
 void d_free (tree t);
 
-bool global_bindings_p (void);
+int global_bindings_p (void);
 void insert_block (tree);
 void set_block (tree);
 tree getdecls (void);

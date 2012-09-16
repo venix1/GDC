@@ -45,6 +45,8 @@ static char lang_name[6] = "GNU D";
 #undef LANG_HOOKS_NAME
 #undef LANG_HOOKS_INIT
 #undef LANG_HOOKS_INIT_OPTIONS
+#undef LANG_HOOKS_INIT_OPTIONS_STRUCT
+#undef LANG_HOOKS_OPTION_LANG_MASK
 #undef LANG_HOOKS_HANDLE_OPTION
 #undef LANG_HOOKS_POST_OPTIONS
 #undef LANG_HOOKS_PARSE_FILE
@@ -77,11 +79,6 @@ static char lang_name[6] = "GNU D";
 #define LANG_HOOKS_GIMPLIFY_EXPR		d_gimplify_expr
 #define LANG_HOOKS_EH_PERSONALITY		d_eh_personality
 #define LANG_HOOKS_EH_RUNTIME_TYPE		d_build_eh_type_type
-
-#undef LANG_HOOKS_OPTION_LANG_MASK
-#undef LANG_HOOKS_INIT_OPTIONS_STRUCT
-#define LANG_HOOKS_OPTION_LANG_MASK         d_option_lang_mask
-#define LANG_HOOKS_INIT_OPTIONS_STRUCT      d_init_options_struct
 
 /* Lang Hooks for decls */
 #undef LANG_HOOKS_WRITE_GLOBALS
@@ -636,11 +633,11 @@ d_write_global_declarations (void)
   check_global_declarations (vec, globalDeclarations.dim);
 
   /* Complete all generated thunks. */
-  cgraph_process_same_body_aliases();
+  // cgraph_process_same_body_aliases();
 
   /* We're done parsing; proceed to optimize and emit assembly. */
   if (! global.errors && ! errorcount)
-    finalize_compilation_unit();
+    cgraph_finalize_compilation_unit();
 
   /* After cgraph has had a chance to emit everything that's going to
      be emitted, output debug information for globals.  */

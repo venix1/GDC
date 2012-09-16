@@ -38,6 +38,8 @@
 #include "toplev.h"
 #include "cgraph.h"
 
+#include "output.h"
+
 #include "d-lang.h"
 
 #include "d-bi-attrs-46.h"
@@ -442,9 +444,9 @@ gcc_d_backend_init (void)
      converting (C signed char *) to (D char *) for string arguments of
      built-in functions.
      Parameters are (signed_char = false, short_double = false).  */
-  build_common_tree_nodes (false, false);
+  // build_common_tree_nodes (false, false);
+  build_common_tree_nodes (false);
 
-#if 0
   // This is also required (or the manual equivalent) or crashes
   // will occur later
   char_type_node = d_type_for_size(CHAR_TYPE_SIZE, 1);
@@ -481,6 +483,7 @@ gcc_d_backend_init (void)
   TYPE_NAME (char_type_node) = build_decl (UNKNOWN_LOCATION, TYPE_DECL,
 					   get_identifier ("char"), char_type_node);
 
+#if 0
   REALSIZE = int_size_in_bytes (long_double_type_node);
   REALPAD = 0;
   REALALIGNSIZE = TYPE_ALIGN_UNIT (long_double_type_node);
