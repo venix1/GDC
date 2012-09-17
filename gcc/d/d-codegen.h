@@ -563,6 +563,8 @@ struct CtorEltMaker
 
   void cons (tree p, tree v)
   {
+    /* tree.h unavailable.  Manually inline this macro
+      CONSTRUCTOR_APPEND_ELT(this->head, p, v); */
     constructor_elt *ce;
     ce = VEC_safe_push (constructor_elt, gc, this->head, NULL);
     ce->index = p;
