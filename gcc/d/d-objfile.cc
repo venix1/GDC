@@ -587,22 +587,19 @@ ObjectFile::stripVarDecl (tree value)
       gcc_assert (d_type);
 
       d_type = d_type->toBasetype();
-      switch (d_type->ty)
-	{
-	case Tstruct: 
-	  {
-	    // %% maker sure this is doing the right thing...
-	    // %% better do get rid of it..
-	    dt_t *dt = NULL;
-	    d_type->toDt (&dt);
-	    tree t = dt2tree (dt);
-	    TREE_CONSTANT (t) = 1;
-	    return t;
-	  }
 
-	default:
-	  gcc_unreachable();
+      if (d_type->ty == Tstruct)
+	{
+	  // %% maker sure this is doing the right thing...
+	  // %% better do get rid of it..
+	  dt_t *dt = NULL;
+	  d_type->toDt (&dt);
+	  tree t = dt2tree (dt);
+	  TREE_CONSTANT (t) = 1;
+	  return t;
 	}
+      else
+	gcc_unreachable();
     }
 }
 
