@@ -62,6 +62,10 @@ extern Module *d_gcc_get_output_module (void);
 /* used in interpret.c */
 extern Expression *d_gcc_eval_builtin (Loc, FuncDeclaration *, Expressions *);
 
-#endif
+/* used in arrayop.c */
+extern int binary(const char *p , const char **tab, int high);
+
+#endif /* __cplusplus */
 
 #endif
+

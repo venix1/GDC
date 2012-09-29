@@ -111,7 +111,7 @@ D d: $(D_COMPILER_NAME)$(exeext) d/pkgvars
 
 D_BORROWED_C_OBJS = attribs.o
 D_EXTRA_LIBS = $(BACKENDLIBS)
-D_EXTRA_SPEC_LIBS = libcommon-target.a
+#D_EXTRA_SPEC_LIBS = libcommon-target.a
 
 D_INCLUDES = -I$(srcdir)/d -I$(srcdir)/d/dfrontend -Id
 # -Wno-long-double is for MacOS X -- needs to be configurated
@@ -289,20 +289,55 @@ $(D_COMPILER_NAME)$(exeext): $(D_ALL_OBJS) $(BACKEND) $(LIBDEPS)
 		$(D_ALL_OBJS) $(BACKEND) $(LIBS) $(D_EXTRA_LIBS)
 
 
+# Documentation.
+
+D_TEXI_FILES = \
+	d/gdc.texi \
+	$(gcc_docdir)/include/fdl.texi \
+	$(gcc_docdir)/include/gpl_v3.texi \
+	$(gcc_docdir)/include/gcc-common.texi \
+	gcc-vers.texi
+
+doc/gdc.info: $(D_TEXI_FILES)
+	if test "x$(BUILD_INFO)" = xinfo; then \
+	    rm -f doc/gdc.info*; \
+	    $(MAKEINFO) $(MAKEINFOFLAGS) -I $(gcc_docdir) \
+		-I $(gcc_docdir)/include -o $@ $<; \
+	else true; fi
+
+doc/gdc.dvi: $(D_TEXI_FILES)
+	$(TEXI2DVI) -I $(abs_docdir) -I $(abs_docdir)/include -o $@ $<
+
+doc/gdc.pdf: $(D_TEXI_FILES)
+	$(TEXI2PDF) -I $(abs_docdir) -I $(abs_docdir)/include -o $@ $<
+
+$(build_htmldir)/d/index.html: $(D_TEXI_FILES)
+	$(mkinstalldirs) $(@D)
+	rm -f $(@D)/*
+	$(TEXI2HTML) -I $(gcc_docdir) -I $(gcc_docdir)/include \
+		-I $(srcdir)/d -o $(@D) $<
+
+.INTERMEDIATE: gdc.pod
+
+gdc.pod: d/gdc.texi
+	-$(TEXI2POD) -D gdc < $< > $@
+
 # Build hooks:
 
 d.all.build: $(D_DRIVER_NAME)$(exeext) $(D_COMPILER_NAME)$(exeext)
 d.all.cross: $(D_DRIVER_NAME)-cross$(exeext)
 d.start.encap: $(D_DRIVER_NAME)$(exeext)
 d.rest.encap:
-d.info:
-d.srcinfo:
+d.info: doc/gdc.info
+d.srcinfo: doc/gdc.info
+	-cp -p $^ $(srcdir)/doc
 d.srcextra:
-d.dvi:
-d.pdf:
-d.html:
-d.man:
-d.srcman:
+d.dvi: doc/gdc.dvi
+d.pdf: doc/gdc.pdf
+d.html: $(build_htmldir)/d/index.html
+d.man: doc/gdc.1
+d.srcman: doc/gdc.1
+	cp -p $^ $(srcdir)/doc
 
 
 # Install hooks:
@@ -334,11 +369,38 @@ d.install-common: installdirs
 	  fi ; \
 	fi
 
-d.install-info:
+d.install-info: $(DESTDIR)$(infodir)/gdc.info
 
-d.install-man: installdirs $(DESTDIR)$(man1dir)/$(D_INSTALL_NAME)$(man1ext) $(DESTDIR)$(man1dir)/$(GDMD_INSTALL_NAME)$(man1ext)
+d.install-pdf: doc/gdc.pdf
+	@$(NORMAL_INSTALL)
+	test -z "$(pdfdir)" || $(mkinstalldirs) "$(DESTDIR)$(pdfdir)/gcc"
+	@for p in doc/gdc.pdf; do \
+	    if test -f "$$p"; then d=; else d="$(srcdir)/"; fi; \
+	    f=$(pdf__strip_dir) \
+	    echo " $(INSTALL_DATA) '$$d$$p' '$(DESTDIR)$(pdfdir)/gcc/$$f'"; \
+	    $(INSTALL_DATA) "$$d$$p" "$(DESTDIR)$(pdfdir)/gcc/$$f"; \
+	done
 
-$(DESTDIR)$(man1dir)/$(D_INSTALL_NAME)$(man1ext): $(srcdir)/d/gdc.1
+d.install-html: $(build_htmldir)/d
+	@$(NORMAL_INSTALL)
+	test -z "$(htmldir)" || $(mkinstalldirs) "$(DESTDIR)$(htmldir)"
+	@for p in $(build_htmldir)/d; do \
+	    if test -f "$$p" || test -d "$$p"; then d=""; else d="$(srcdir)/"; fi; \
+	    f=$(html__strip_dir) \
+	    if test -d "$$d$$p"; then \
+		echo " $(mkinstalldirs) '$(DESTDIR)$(htmldir)/$$f'"; \
+		$(mkinstalldirs) "$(DESTDIR)$(htmldir)/$$f" || exit 1; \
+		echo " $(INSTALL_DATA) '$$d$$p'/* '$(DESTDIR)$(htmldir)/$$f'"; \
+		$(INSTALL_DATA) "$$d$$p"/* "$(DESTDIR)$(htmldir)/$$f"; \
+	    else \
+		echo " $(INSTALL_DATA) '$$d$$p' '$(DESTDIR)$(htmldir)/$$f'"; \
+		$(INSTALL_DATA) "$$d$$p" "$(DESTDIR)$(htmldir)/$$f"; \
+	    fi; \
+        done
+
+d.install-man: $(DESTDIR)$(man1dir)/$(D_INSTALL_NAME)$(man1ext) $(DESTDIR)$(man1dir)/$(GDMD_INSTALL_NAME)$(man1ext)
+
+$(DESTDIR)$(man1dir)/$(D_INSTALL_NAME)$(man1ext): doc/gdc.1 installdirs
 	-rm -f $@
 	-$(INSTALL_DATA) $< $@
 	-chmod a-x $@
