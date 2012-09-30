@@ -2977,7 +2977,7 @@ IRState::maybeExpandSpecialCall (tree call_exp)
 	  /* builtin count_trailing_zeros matches behaviour of bsf.
 	     %% TODO: The return value is supposed to be undefined if op1 is zero. */
 	  op1 = ce.nextArg();
-	  return buildCall (builtin_decl_explicit (BUILT_IN_CTZL), 1, op1);
+	  return buildCall (d_built_in_decls (BUILT_IN_CTZL), 1, op1);
 
 	case INTRINSIC_BSR:
 	  /* bsr becomes 31-(clz), but parameter passed to bsf may not be a 32bit type!!
@@ -2986,7 +2986,7 @@ IRState::maybeExpandSpecialCall (tree call_exp)
 	  type = TREE_TYPE (op1);
 
 	  op2 = integerConstant (tree_low_cst (TYPE_SIZE (type), 1) - 1, type);
-	  exp = buildCall (builtin_decl_explicit (BUILT_IN_CLZL), 1, op1);
+	  exp = buildCall (d_built_in_decls (BUILT_IN_CLZL), 1, op1);
 
 	  // Handle int -> long conversions.
 	  if (TREE_TYPE (exp) != type)
@@ -3047,7 +3047,7 @@ IRState::maybeExpandSpecialCall (tree call_exp)
 	  /* Backend provides builtin bswap32.
 	     Assumes first argument and return type is uint. */
 	  op1 = ce.nextArg();
-	  return buildCall (builtin_decl_explicit (BUILT_IN_BSWAP32), 1, op1);
+	  return buildCall (d_built_in_decls (BUILT_IN_BSWAP32), 1, op1);
 
 	case INTRINSIC_INP:
 	case INTRINSIC_INPL:
@@ -3084,17 +3084,17 @@ IRState::maybeExpandSpecialCall (tree call_exp)
 	case INTRINSIC_COS:
 	  // Math intrinsics just map to their GCC equivalents.
 	  op1 = ce.nextArg();
-	  return buildCall (builtin_decl_explicit (BUILT_IN_COSL), 1, op1);
+	  return buildCall (d_built_in_decls (BUILT_IN_COSL), 1, op1);
 
 	case INTRINSIC_SIN:
 	  op1 = ce.nextArg();
-	  return buildCall (builtin_decl_explicit (BUILT_IN_SINL), 1, op1);
+	  return buildCall (d_built_in_decls (BUILT_IN_SINL), 1, op1);
 
 	case INTRINSIC_RNDTOL:
 	  // %% not sure if llroundl stands as a good replacement
 	  // for the expected behaviour of rndtol.
 	  op1 = ce.nextArg();
-	  return buildCall (builtin_decl_explicit (BUILT_IN_LLROUNDL), 1, op1);
+	  return buildCall (d_built_in_decls (BUILT_IN_LLROUNDL), 1, op1);
 
 	case INTRINSIC_SQRT:
 	  // Have float, double and real variants of sqrt.
@@ -3103,16 +3103,16 @@ IRState::maybeExpandSpecialCall (tree call_exp)
 	  // Could have used mathfn_built_in, but that only returns
 	  // implicit built in decls.
 	  if (TYPE_MAIN_VARIANT (type) == double_type_node)
-	    exp = builtin_decl_explicit (BUILT_IN_SQRT);
+	    exp = d_built_in_decls (BUILT_IN_SQRT);
 	  else if (TYPE_MAIN_VARIANT (type) == float_type_node)
-	    exp = builtin_decl_explicit (BUILT_IN_SQRTF);
+	    exp = d_built_in_decls (BUILT_IN_SQRTF);
 	  else if (TYPE_MAIN_VARIANT (type) == long_double_type_node)
-	    exp = builtin_decl_explicit (BUILT_IN_SQRTL);
+	    exp = d_built_in_decls (BUILT_IN_SQRTL);
 	  // op1 is an integral type - use double precision.
 	  else if (INTEGRAL_TYPE_P (TYPE_MAIN_VARIANT (type)))
 	    {
 	      op1 = d_convert_basic (double_type_node, op1);
-	      exp = builtin_decl_explicit (BUILT_IN_SQRT);
+	      exp = d_built_in_decls (BUILT_IN_SQRT);
 	    }
 
 	  gcc_assert (exp);    // Should never trigger.
@@ -3121,15 +3121,15 @@ IRState::maybeExpandSpecialCall (tree call_exp)
 	case INTRINSIC_LDEXP:
 	  op1 = ce.nextArg();
 	  op2 = ce.nextArg();
-	  return buildCall (builtin_decl_explicit (BUILT_IN_LDEXPL), 2, op1, op2);
+	  return buildCall (d_built_in_decls (BUILT_IN_LDEXPL), 2, op1, op2);
 
 	case INTRINSIC_FABS:
 	  op1 = ce.nextArg();
-	  return buildCall (builtin_decl_explicit (BUILT_IN_FABSL), 1, op1);
+	  return buildCall (d_built_in_decls (BUILT_IN_FABSL), 1, op1);
 
 	case INTRINSIC_RINT:
 	  op1 = ce.nextArg();
-	  return buildCall (builtin_decl_explicit (BUILT_IN_RINTL), 1, op1);
+	  return buildCall (d_built_in_decls (BUILT_IN_RINTL), 1, op1);
 
 	case INTRINSIC_VA_ARG:
 	case INTRINSIC_C_VA_ARG:
@@ -3196,7 +3196,7 @@ IRState::maybeExpandSpecialCall (tree call_exp)
 
 	  op2 = TREE_OPERAND (op2, 0);
 	  // assuming nobody tries to change the return type
-	  return buildCall (builtin_decl_explicit (BUILT_IN_VA_START), 2, op1, op2);
+	  return buildCall (d_built_in_decls (BUILT_IN_VA_START), 2, op1, op2);
 
 	default:
 	  gcc_unreachable();
@@ -3294,11 +3294,11 @@ IRState::floatMod (tree type, tree arg0, tree arg1)
     basetype = TREE_TYPE (basetype);
 
   if (TYPE_MAIN_VARIANT (basetype) == double_type_node)
-    fmodfn = builtin_decl_explicit (BUILT_IN_FMOD);
+    fmodfn = d_built_in_decls (BUILT_IN_FMOD);
   else if (TYPE_MAIN_VARIANT (basetype) == float_type_node)
-    fmodfn = builtin_decl_explicit (BUILT_IN_FMODF);
+    fmodfn = d_built_in_decls (BUILT_IN_FMODF);
   else if (TYPE_MAIN_VARIANT (basetype) == long_double_type_node)
-    fmodfn = builtin_decl_explicit (BUILT_IN_FMODL);
+    fmodfn = d_built_in_decls (BUILT_IN_FMODL);
 
   if (!fmodfn)
     {
@@ -3458,7 +3458,7 @@ IRState::exceptionObject (void)
     obj_type = TREE_TYPE (obj_type);
   // Like Java, the actual D exception object is one
   // pointer behind the exception header
-  tree t = buildCall (builtin_decl_explicit (BUILT_IN_EH_POINTER),
+  tree t = buildCall (d_built_in_decls (BUILT_IN_EH_POINTER),
 		      1, integer_zero_node);
   // treat exception header as (Object *)
   t = build1 (NOP_EXPR, build_pointer_type (obj_type), t);
