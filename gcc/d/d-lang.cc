@@ -167,7 +167,7 @@ static void
 d_initialize_diagnostics (diagnostic_context *context)
 {
   // We don't need any of these in error messages.
-  context->show_caret = false;
+  /* context->show_caret = false; */
   context->show_option_requested = false;
   context->show_column = false;
 }
