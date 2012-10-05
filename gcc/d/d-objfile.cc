@@ -384,12 +384,14 @@ ObjectFile::outputFunction (FuncDeclaration *f)
 
   gcc_assert (TREE_CODE (t) == FUNCTION_DECL);
 
-  // Write out _tlsstart/_tlsend.
+  // Write out _tlsstart/_tlsend but not for MinGW.
   // For MinGW we alias _tls_start and _tls_end.  Otherwise we have an offset
   // that could result in memory corruption.  As well as alignment issues for
   // the GC.
-  if (f->isMain() || f->isWinMain() || f->isDllMain() && !TARGET_WINDOS)
+#ifndef TARGET_WINDOS
+  if (f->isMain() || f->isWinMain() || f->isDllMain())
     obj_tlssections();
+#endif 
 
   if (s->prettyIdent)
     DECL_NAME (t) = get_identifier (s->prettyIdent);
