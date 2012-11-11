@@ -148,6 +148,8 @@ version( Windows )
         }
         else version( MinGW )
         {
+            import gcc.builtins;
+        
             // NOTE: The memory between the addresses of _tls_start and _tls_end
             //       is the storage for thread-local data in MinGW.  Both of
             //       these are defined in tlssup.c.
@@ -731,7 +733,7 @@ class Thread
             // Solution: Create the thread in suspended state and then
             //       add and resume it with slock acquired
             assert(m_sz <= uint.max, "m_sz must be less than or equal to uint.max");
-            m_hndl = cast(HANDLE) _beginthreadex( null, m_sz, &thread_entryPoint, cast(void*) this, CREATE_SUSPENDED, &m_addr );
+            m_hndl = cast(HANDLE) _beginthreadex( null, cast(uint)m_sz, &thread_entryPoint, cast(void*) this, CREATE_SUSPENDED, &m_addr );
             if( cast(size_t) m_hndl == 0 )
                 throw new ThreadException( "Error creating thread" );
         }
@@ -2889,6 +2891,23 @@ private void* getStackBottom()
             asm { naked; mov EAX, FS:4; ret; }
         else version(D_InlineAsm_X86_64)
             asm { naked; mov RAX, GS:4; ret; }
+        else version( GNU_InlineAsm )
+        {
+            void *bottom;
+            version( X86 )
+            {
+                asm{ "movl %%fs:4, %0;" : "=r" bottom; }                
+            }
+            else version( X86_64 )
+            {
+                asm{ "movq %%gs:8, %0;" : "=r" bottom; }            
+            }
+            else
+            {
+                static assert( false, "Platform not supported.");
+            }
+            return bottom;
+        }             
         else
             static assert(false, "Architecture not supported.");
     }
@@ -4071,7 +4090,8 @@ private:
         //       global context list.
         Thread.remove( m_ctxt );
 
-        import core.sys.posix.sys.mman; // munmap
+        version( Posix )
+            import core.sys.posix.sys.mman; // munmap
 
         static if( __traits( compiles, VirtualAlloc ) )
         {

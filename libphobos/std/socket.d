@@ -8,7 +8,7 @@
         Permission is hereby granted, free of charge, to any person or organization
         obtaining a copy of the software and accompanying documentation covered by
         this license (the "Software") to use, reproduce, display, distribute,
-        execute, and transmit the Software, and to prepare derivative works of the
+        execute, and transmit the Software, and to prepare derivative gworks of the
         Software, and to permit third-parties to whom the Software is furnished to
         do so, all subject to the following:
 
@@ -937,12 +937,13 @@ private AddressInfo[] getAddressInfoImpl(in char[] node, in char[] service, addr
 
         AddressInfo[] result;
         // Use const to force UnknownAddressReference to copy the sockaddr.
+        // socklen_t.sizeof does not always equal size_t.sizeof.  Win64 for instance.
         for (const(addrinfo)* ai = ai_res; ai; ai = ai.ai_next)
             result ~= AddressInfo(
                 cast(AddressFamily) ai.ai_family,
                 cast(SocketType   ) ai.ai_socktype,
                 cast(ProtocolType ) ai.ai_protocol,
-                new UnknownAddressReference(ai.ai_addr, ai.ai_addrlen),
+                new UnknownAddressReference(ai.ai_addr, to!socklen_t(ai.ai_addrlen)),
                 ai.ai_canonname ? to!string(ai.ai_canonname) : null);
 
         assert(result.length > 0);

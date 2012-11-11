@@ -39,10 +39,26 @@ private
         {
             extern __gshared
             {
-                int _data_start__;
-                int _data_end__;
-                int _bss_start__;
-                int _bss_end__;
+                version (X86_64)
+                {
+                    /* These symbols are defined in the linker script and have
+                       not been updated to use Win64 ABI. So alias to the 
+                       correct symbol.*/
+                    int __data_start__;
+                    int __data_end__;
+                    int __bss_start__;
+                    int __bss_end__;
+
+                    alias __data_start__ _data_start__;
+                    alias __data_end__   _data_end__;
+                    alias __bss_start__  _bss_start__;
+                    alias __bss_end__    _bss_end__;
+                } else {
+                    int _data_start__;
+                    int _data_end__;
+                    int _bss_start__;
+                    int _bss_end__;
+                }        
             }
         }
     }

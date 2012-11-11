@@ -57,7 +57,7 @@ public:
 
         foreach( i, e; m_trace )
         {
-            if( (result = dg( i, e )) != 0 )
+            if( 1 /*(result = dg( i, e )) != 0 */ )
                 break;
         }
         return result;
@@ -152,6 +152,8 @@ private:
             }
             else if( stackframe.AddrPC.Offset != 0 )
             {
+                //assert(false, "disabled due to GDC bug( *symbol.Name.ptr )");
+                /+
                 immutable pc = stackframe.AddrPC.Offset;
                 char[] res;
                 if (dbghelp.SymGetSymFromAddr64(hProcess, pc, null, symbol) &&
@@ -170,6 +172,7 @@ private:
                 else
                     res = formatStackFrame(cast(void*)pc);
                 trace ~= res;
+                +/
             }
         }
         debug(PRINTF) printf("End of Callstack\n");

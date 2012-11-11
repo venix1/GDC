@@ -341,12 +341,14 @@ public:
          */
         if( *tlsindex != 0 )
             return true;
-
+        
         void** peb;
+        version( GNU ) { assert(0, "unsupported inline assembly"); } else {
         asm
         {
             mov EAX,FS:[0x30];
             mov peb, EAX;
+        }
         }
         dll_aux.LDR_MODULE *ldrMod = dll_aux.findLdrModule( hInstance, peb );
         if( !ldrMod )

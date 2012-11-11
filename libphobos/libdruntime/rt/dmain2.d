@@ -466,7 +466,8 @@ extern (C) int _d_run_main(int argc, char** argv, main_func main)
         if (IsDebuggerPresent())
             trapExceptions = false;
     }
-
+    version (MinGW) trapExceptions = rt_trapExceptions;
+    
     void tryExec(scope void delegate() dg)
     {
         void printLocLine(Throwable t)
