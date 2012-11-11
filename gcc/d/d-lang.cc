@@ -289,12 +289,9 @@ d_init (void)
   /* Should define this anyway to set us apart from the competition. */
   VersionCondition::addPredefinedGlobalIdent ("GNU_InlineAsm");
 
-  /* Logic copied from cppbuiltins for LP64 targets. */
-  if (TYPE_PRECISION (long_integer_type_node) == 64
-      && TYPE_PRECISION (integer_type_node) == 32 && POINTER_SIZE == 64)
-    {
+  /* D is always LP64 on 64-bits. */
+  if (POINTER_SIZE == 64)
       VersionCondition::addPredefinedGlobalIdent ("D_LP64");
-    }
 
   /* Setting global.params.cov forces module info generation which is
      not needed for thee GCC coverage implementation.  Instead, just
