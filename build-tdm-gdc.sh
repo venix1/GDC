@@ -109,8 +109,8 @@ build_gdc()
        
        popd
        
-       export CC="gcc -m32"
-       export CXX="g++ -m32"
+       CC="gcc -m32"
+       CXX="g++ -m32"
        # --debug Disable optimizations.
        #find . -name Makefile -exec sed -i 's/-O2/-O0 -g3/g' {} \; -exec chmod 644 {} \;
        /crossdev/gccbuilder/build-tdm64.sh gcc $ARGS 2>&1 | tee build.log
@@ -275,7 +275,7 @@ package()
         cp -r $D1/libexec/gcc/$ARCH/$GCC_VER/* $1/release/libexec/gcc/$ARCH/$GCC_VER/
         rm $1/release/libexec/gcc/$ARCH/$GCC_VER/cc1.exe
         
-        # D1 files
+        # D1 files - Support removed
         cp $D1/lib/libgphobos.a $1/release/lib
         cp $D1/lib/cmain.o $1/release/lib/d1main.o
         cp -rf $D1/include/d $1/release/include
@@ -332,21 +332,29 @@ package()
         mkdir -p $1/release/$ARCH/lib/ldscripts
         
         
-        # D1 files
-        cp $D1/lib32/libgphobos.a $1/release/lib32
-        cp $D1/lib/libgphobos.a $1/release/lib
-        cp $D1/lib32/cmain.o $1/release/lib32/d1main.o
-        cp $D1/lib/cmain.o $1/release/lib/d1main.o
-        cp -rf $D1/include/d $1/release/include
-        cp $D1/libexec/gcc/$ARCH/$GCC_VER/cc1d.exe $1/release/libexec/gcc/$ARCH/$GCC_VER/cc1d1.exe
+        # D1 files - Not supported
+        #cp $D1/lib32/libgphobos.a $1/release/lib32
+        #cp $D1/lib/libgphobos.a $1/release/lib
+        #cp $D1/lib32/cmain.o $1/release/lib32/d1main.o
+        #cp $D1/lib/cmain.o $1/release/lib/d1main.o
+        #cp -rf $D1/include/d $1/release/include
+        #cp $D1/libexec/gcc/$ARCH/$GCC_VER/cc1d.exe $1/release/libexec/gcc/$ARCH/$GCC_VER/cc1d1.exe
         
 
         # D2 files
-        cp $D2/lib32/libgphobos2.a $1/release/lib32
+        # Multilib compiling not working.  Grab from build directory
+        # Must manujally compile that directory
+        #cp $D2/lib32/libgphobos2.a $1/release/lib32
+        #cp $D2/lib32/dmain.o $1/release/lib32/dmain.o
+        cp $D2/../build/x86_64-w64-mingw32/32/libphobos/libgphobos2.a $1/release/lib32
+        cp $D2/../build/x86_64-w64-mingw32/32/libphobos/libdruntime/libgdruntime.a $1/release/lib32
+        cp $D2/../build/x86_64-w64-mingw32/32/libphobos/libdruntime/rt/dmain.o $1/release/lib32
+        
+
         cp $D2/lib/libgphobos2.a $1/release/lib
-        cp $D2/lib32/dmain.o $1/release/lib32/dmain.o
+        cp $D2/lib/libgdruntime.a $1/release/lib
         cp $D2/lib/dmain.o $1/release/lib/dmain.o
-        cp -rf $D2/include/d2 $1/release/include
+        cp -rf $D2/include/d $1/release/include
         cp $D2/libexec/gcc/$ARCH/$GCC_VER/cc1d.exe $1/release/libexec/gcc/$ARCH/$GCC_VER/
 
         # Non-unique files.
@@ -427,6 +435,8 @@ setup_gdc_build()
     
     # Extract GCC
     tar -xjf src/gcc-core-4.6.1.tar.bz2 -C $path
+    tar -xjf src/gcc-g++-4.6.1.tar.bz2 -C $path
+    
     
     # Extract sqlite, curl libraries
     unzip -o src/sqlite-amalgamation-3071100.zip -d $path &> /dev/null   
@@ -449,11 +459,11 @@ setup_gdc_build()
     
     # TDM patches
     #patch -f -d $path/gcc-4.6.1/ -p1 < /crossdev/gccbuilder/buildsys.patch #ada
-    #patch -f -d $path/gcc-4.6.1/ -p1 < /crossdev/gccbuilder/defstatic.patch #c++
+    patch -f -d $path/gcc-4.6.1/ -p1 < /crossdev/gccbuilder/defstatic.patch #c++
     #patch -f -d $path/gcc-4.6.1/ -p1 < /crossdev/gccbuilder/dllinline.patch #Fails
-    #patch -f -d $path/gcc-4.6.1/ -p1 < /crossdev/gccbuilder/eh_shmem.patch #??
+    patch -f -d $path/gcc-4.6.1/ -p1 < /crossdev/gccbuilder/eh_shmem.patch #??
     patch -f -d $path/gcc-4.6.1/ -p1 < /crossdev/gccbuilder/headerpath.patch
-    #patch -f -d $path/gcc-4.6.1/ -p1 < /crossdev/gccbuilder/lfs.patch #C++
+    patch -f -d $path/gcc-4.6.1/ -p1 < /crossdev/gccbuilder/lfs.patch #C++
     # Required to avoid missing -lgcc_eh errors. 
     patch -f -d $path/gcc-4.6.1/ -p1 < /crossdev/gccbuilder/libgcceh.patch
     patch -f -d $path/gcc-4.6.1/ -p1 < /crossdev/gccbuilder/libgomp.patch
@@ -461,6 +471,8 @@ setup_gdc_build()
     #patch -f -d $path/gcc-4.6.1/ -p1 < /crossdev/gccbuilder/lto-virtbase.patch#Fails
     patch -f -d $path/gcc-4.6.1/ -p1 < /crossdev/gccbuilder/make-rel-pref.patch
     patch -f -d $path/gcc-4.6.1/ -p1 < /crossdev/gccbuilder/relocate.patch
+    #patch -f -d $path/gcc-4.6.1/ -p1 < /crossdev/gccbuilder/win64sup.patch # pthreads
+    
     
     
     # Setup D
