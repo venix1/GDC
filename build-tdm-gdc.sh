@@ -1,5 +1,14 @@
 #!/bin/bash
 
+# a.exe killer
+# function seconds(time) {
+#   if (match(time, "([0-9]+):([0-9]+):([0-9]+)", a)) {
+#     return a[1] * 3600 + a[2] * 60 + a[3]
+#   }
+#   return -1; # or error invalid time
+# }
+# 
+
 # Default Options
 use_hg_revision=1
 stage="download"
@@ -33,7 +42,6 @@ stage="download"
 
 # URL of all source prerequisits.
 sources=(
-    "https://bitbucket.org/venix1/mingw-gdc/downloads/md5sum"
     "https://bitbucket.org/venix1/mingw-gdc/downloads/curl-7.26.0-devel-mingw32.7z"
     "https://bitbucket.org/venix1/mingw-gdc/downloads/curl-7.26.0-devel-mingw64.7z"
     "https://bitbucket.org/venix1/mingw-gdc/downloads/binutils-2.21.53-1-mingw32-src.tar.lzma"
@@ -56,7 +64,8 @@ sources=(
 # URL of compiler pieces.
 compilers=(
     "http://sourceforge.net/projects/tdm-gcc/files/TDM-GCC%204.6%20series/4.6.1-tdm64-1/gcc-4.6.1-tdm64-1-core.tar.lzma"
-    "http://sourceforge.net/projects/tdm-gcc/files/GNU%20binutils/binutils-2.21.53-20110731-tdm64-1.tar.lzma"
+	"http://downloads.sourceforge.net/project/tdm-gcc/GNU%20binutils/binutils-2.22.90-tdm64-1.tar.lzma"
+#    "http://sourceforge.net/projects/tdm-gcc/files/GNU%20binutils/binutils-2.21.53-20110731-tdm64-1.tar.lzma"
     "http://sourceforge.net/projects/tdm-gcc/files/MinGW-w64%20runtime/GCC%204.6%20series/mingw64-runtime-tdm64-gcc46-svn4483.tar.lzma"
     "http://sourceforge.net/projects/tdm-gcc/files/TDM-GCC%204.6%20series/4.6.1-tdm64-1/gcc-4.6.1-tdm64-1-c++.tar.lzma"
     #"http://sourceforge.net/projects/tdm-gcc/files/TDM-GCC%204.6%20series/4.6.1-tdm64-1/gcc-4.6.1-tdm64-1-openmp.tar.lzma"
@@ -226,7 +235,7 @@ extract_global_sources()
     # Extract TDM64 compiler
     echo "Extract TDM64 GCC"
     tar --lzma -xf src/gcc-4.6.1-tdm64-1-core.tar.lzma -C /crossdev/MinGW64
-    tar --lzma -xf src/binutils-2.21.53-20110731-tdm64-1.tar.lzma -C /crossdev/MinGW64
+    tar --lzma -xf src/binutils-2.22.90-tdm64-1.tar.lzma -C /crossdev/MinGW64
     tar --lzma -xf src/mingw64-runtime-tdm64-gcc46-svn4483.tar.lzma -C /crossdev/MinGW64
     tar --lzma -xf src/gcc-4.6.1-tdm64-1-c++.tar.lzma -C /crossdev/MinGW64
     #tar --lzma -xf src/gcc-4.6.1-tdm64-1-openmp.tar.lzma -C /crossdev/MinGW64
@@ -440,8 +449,8 @@ setup_gdc_build()
     
     # Extract sqlite, curl libraries
     unzip -o src/sqlite-amalgamation-3071100.zip -d $path &> /dev/null   
-    unzip -o src/curl-7.26.0-devel-mingw32.zip -d $path &> /dev/null
-    unzip -o src/curl-7.26.0-devel-mingw64.zip -d $path &> /dev/null
+    unzip -o src/curl-7.26.0-devel-mingw32.7z -d $path &> /dev/null
+    unzip -o src/curl-7.26.0-devel-mingw64.7z -d $path &> /dev/null
    
     # Grab repository information
     if ! command -v hg &> /dev/null; then
@@ -530,7 +539,6 @@ state=$(cat state)
 echo "Executing $state"
 case "$state" in
     download )
-        rm src/md5sum
         # Clean downloads.
         # Acquire TDM source.
         for source in "${sources[@]}"; do
@@ -553,13 +561,17 @@ case "$state" in
     verify )
         # Verify md5sums, fail.
         success=1
-        cd ./src/
+		if [ ! -e md5sum ]; then
+		  echo -e "\033[1;31m""File md5sum does not exist. Need wget"
+		  echo -e "\033[0m""mingw-get install msys-wget"
+		  echo download > ../state;
+		  exit
+		fi
         for file in $(md5sum -c md5sum | grep FAILED | cut -d: -f1); do
             echo "Checksum failure for $file. Removing $file"
             rm $file; 
             success=0
         done
-        cd ..
         
         if [ "$success" == 1 ]; then
             # success move to next stage
@@ -574,17 +586,17 @@ case "$state" in
     
 # Begin support libraries
     extract_global )
-        #extract_global_sources
+        extract_global_sources
         echo patch_global > state
     ;;
     
     patch_global )
-        #patch_global_sources
+        patch_global_sources
         echo build_global > state
     ;;
     
     build_global )
-        #build_global_sources
+        build_global_sources
         echo setup_gdc64 > state
     ;;
 
