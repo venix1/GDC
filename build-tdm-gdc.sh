@@ -42,8 +42,9 @@ stage="download"
 
 # URL of all source prerequisits.
 sources=(
-    "https://bitbucket.org/venix1/mingw-gdc/downloads/curl-7.26.0-devel-mingw32.7z"
-    "https://bitbucket.org/venix1/mingw-gdc/downloads/curl-7.26.0-devel-mingw64.7z"
+    "https://bitbucket.org/venix1/mingw-gdc/downloads/curl-7.26.0-devel-mingw32.zip"
+    "https://bitbucket.org/venix1/mingw-gdc/downloads/curl-7.26.0-devel-mingw64.zip"
+    "https://bitbucket.org/venix1/mingw-gdc/downloads/sqlite-amalgamation-3071100.zip"
     "https://bitbucket.org/venix1/mingw-gdc/downloads/binutils-2.21.53-1-mingw32-src.tar.lzma"
     "https://bitbucket.org/venix1/mingw-gdc/downloads/gcc-4.6.1-tdmsrc-2.zip"
     "https://bitbucket.org/venix1/mingw-gdc/downloads/gmp-4.3.2.tar.bz2"
@@ -58,7 +59,7 @@ sources=(
     "https://bitbucket.org/venix1/mingw-gdc/downloads/pthreads-w32-cvs20100527-p1.zip"
     "https://bitbucket.org/venix1/mingw-gdc/downloads/expat-2.0.1.tar.gz"
     "https://bitbucket.org/venix1/mingw-gdc/downloads/ppl-0.11.tar.gz"
-    "https://bitbucket.org/venix1/mingw-gdc/downloads/gcc-core-4.6.1.tar.bz2"
+    "https://bitbucket.org/venix1/mingw-gdc/downloads/gcc-core-4.6.1.tar.bz2"   
 )
 
 # URL of compiler pieces.
@@ -421,25 +422,16 @@ package()
 }
 
 # Patch source files.
-patch_sources()
+patch_global_sources()
 {
-    set empty57abcdef
-    unset empty57abcdef
+  echo > /dev/null
 }
 
-# Verifies a command is available and up to date.
-# require cmd [version]
-requires()
-{
-    set empty57abcdef
-    unset empty57abcdef
-}
-
-setup_gdc_build()
+function setup_gdc_build
 {
     path=/crossdev/$1
     version=`basename $path`
-    
+
     rm -rf "$path/*"
     
     # Extract GCC
@@ -449,8 +441,8 @@ setup_gdc_build()
     
     # Extract sqlite, curl libraries
     unzip -o src/sqlite-amalgamation-3071100.zip -d $path &> /dev/null   
-    unzip -o src/curl-7.26.0-devel-mingw32.7z -d $path &> /dev/null
-    unzip -o src/curl-7.26.0-devel-mingw64.7z -d $path &> /dev/null
+    unzip -o src/curl-7.26.0-devel-mingw32.zip -d $path &> /dev/null
+    unzip -o src/curl-7.26.0-devel-mingw64.zip -d $path &> /dev/null
    
     # Grab repository information
     if ! command -v hg &> /dev/null; then
@@ -510,23 +502,34 @@ setup_gdc_build()
     popd
 }
 
+# Sanity Checks
+# require cmd [version]
+requires()
+{
+  bin=$(which $1 2> /dev/null)
+  if [ "$bin" == "" ]; then
+    echo "Missing binary $1"
+    exit 1
+  fi
+}
 # Make sure MSYS is capable and up to date.
-test_msys()
-{  
+function check_system {  
 #     /mingw is required to be empty.
 #    if [ "$(ls -A /mingw)" ]; then
 #        echo "/mingw must be empty.  Make sure it is not defined in /etc/fstab and try again."
-#        exit 0
+#        exit 1
 #    fi
 
-    requires unzip
     requires wget 
-#    echo "" # avoid empty command.
+    requires bzip2
+    requires patch
+    requires unzip
 }
 
 #handle_options
 
-test_msys
+
+check_system
 make_directory_layout
 
 if [ ! -e state ]; then
@@ -600,25 +603,6 @@ case "$state" in
         echo setup_gdc64 > state
     ;;
 
-# Begin 32-bit compiler block
-        #setup_gdc_build "gdc/v1"
-        #build_gdc "gdc/v1"
-
-        #setup_gdc_build "gdc/v2"
-        #build_gdc "gdc/v2"
-
-        #test_compiler("gdc/d1")
-        #test_compiler("gdc/d2")
-
-        #package gdc
-
-# Begin 64-bit compiler block
-        # 64 bit -m64
-
-        # -dual
-        #setup_gdc_build "gdc64/v1"
-        #build_gdc "gdc64/v1"
-
     setup_gdc64 )
         setup_gdc_build "gdc64/v2"
         echo build_gdc64 > state
@@ -633,6 +617,7 @@ case "$state" in
         #test_compiler("gdc64/d2")
 
     package_gdc64 )
+        exit 0
         package gdc64
         echo finish > state
     ;;

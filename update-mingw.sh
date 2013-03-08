@@ -34,7 +34,7 @@ echo $top $d_gccsrc
 
 # 1. Copy sources
 mkdir -p "$d_gccsrc/gcc/d"           && \
-  mkdir -p "$d_gccsrc/gcc/testsuite" && \  
+  mkdir -p "$d_gccsrc/gcc/testsuite" && \
   cd "$d_gccsrc/gcc"                 && \
   rsync -rav "$top/gcc/d" .          && \
   rsync -rav "$top/gcc/testsuite" .  && \
