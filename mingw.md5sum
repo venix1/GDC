@@ -3,8 +3,8 @@ e7f6602056f594acc9a4a559909d4649 *src/binutils-2.21.53-1-mingw32-src.tar.lzma
 1fcc42bf706963e7a61db73dfe1b437c *src/binutils-2.21.53-20110731.tar.bz2
 5a479b6be2aac0b53338abfc64f706ce *src/binutils-2.22.90-tdm64-1.tar.lzma
 060ae4df6fb8176e021b4d033a6c0b9e *src/cloog-ppl-0.15.11.tar.gz
-7c3a3e997e930a15adbec44eee78e90e *src/curl-7.26.0-devel-mingw32.7z
-640da509de4ac80c43cd1de20e0b0499 *src/curl-7.26.0-devel-mingw64.7z
+f93c0b6312365cfd5243be80dbfcf86d *src/curl-7.26.0-devel-mingw32.zip
+583ecdba469bd5777a9b47cf108f905b *src/curl-7.26.0-devel-mingw64.zip
 ee8b492592568805593f81f8cdf2a04c *src/expat-2.0.1.tar.gz
 80d19fe17c818998b62f832b21cd6a29 *src/gcc-4.6.1-tdm-1-c++.tar.lzma
 46c77a35a5068b121760a0276dc7511e *src/gcc-4.6.1-tdm-1-core.tar.lzma
@@ -12,6 +12,7 @@ ee8b492592568805593f81f8cdf2a04c *src/expat-2.0.1.tar.gz
 54c277aa96f1ff52d511dccdedabe610 *src/gcc-4.6.1-tdm64-1-core.tar.lzma
 90536816a992da2e43479a7ccd6333ee *src/gcc-4.6.1-tdmsrc-2.zip
 0c0e7e35d2215e19de9c97efba507553 *src/gcc-core-4.6.1.tar.bz2
+0d75ca7ca35b1e7f252223f9d23a6ad1 *src/gcc-g++-4.6.1.tar.bz2
 dd60683d7057917e34630b4a787932e8 *src/gmp-4.3.2.tar.bz2
 df315275e770cc6c232ee5de6bfa5d85 *src/libiconv-1.13.1-1-mingw32-dll-2.tar.lzma
 7ab33ebd26687c744a37264a330bbe9a *src/libiconv-1.13.1.tar.gz
@@ -25,5 +26,6 @@ e98267ebd5648a39f881d66797122fb6 *src/mpc-0.8.2.tar.gz
 89e59fe665e2b3ad44a6789f40b059a0 *src/mpfr-2.4.2.tar.bz2
 ba527ec0ffc830ce16fad8a4195a337e *src/ppl-0.11.tar.gz
 e5e8f31afdb3605aba10cb2d798b3459 *src/pthreads-w32-cvs20100527-p1.zip
+bb6e4e9d01b58d4f072fec116159f1f8 *src/sqlite-amalgamation-3071100.zip
 c3a86ffa6b8c21de868df54e4e38f05e *src/w32api-3.17-2-mingw32-dev.tar.lzma
 7a14e6c9687c010eed35db95604548a4 *src/w32api-3.17-2-mingw32-src.tar.lzma

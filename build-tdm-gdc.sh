@@ -1,19 +1,94 @@
 #!/bin/bash
 
-# a.exe killer
-# function seconds(time) {
-#   if (match(time, "([0-9]+):([0-9]+):([0-9]+)", a)) {
-#     return a[1] * 3600 + a[2] * 60 + a[3]
-#   }
-#   return -1; # or error invalid time
-# }
-# 
-
 # Default Options
 use_hg_revision=1
 stage="download"
 
 # Clean stage prior to resuming.  This means patching/configuring should be merge 
+# Reorder.  Extract/patching routine.  All files must be extracted then patched.
+# Convert to git revision
+
+
+# kill conftest.exe that's run for more than a minute
+# pthreadGC2_64.dll is missing
+# Update gccbuilder patch for disabling bootstrap
+
+
+# PATCH GMP with gmp-4.3.2-w64.patch
+# --with-local-prefix is required if not using winsup
+# change makefile enable-languages
+# libiconv is required
+
+# LPATH to avoid linking errors
+# Need built binaries for the dlls in path.
+
+# Allow rebuilding of phobos only.
+
+# Dev mode.  Extract sources apply patches.  Ability to diff and generate new patches
+
+# parse commandline options
+# --shell{32,64}. Sets up environment used to compile target
+# --{stage} restarts process from stage
+
+usage()
+{
+cat << EOF
+usage: $(basename $0) options
+
+Automates the GDC build process.
+
+OPTIONS:
+
+   -h, --help   Show this message                       
+   -s, --shell  Opens a shell with correct GCC environment variables
+   -state <state>   Valid States:
+                        download
+                        verify
+                        extract_global
+                        patch_global
+                        build_global
+                        setup_gdc64
+                        build_gdc64
+                        package_gdc64   
+EOF
+}
+
+# Handle options parsing
+while [ $# -gt 0 ]
+do
+    case $1 in
+        --state)
+            echo $2 > state
+            shift 2
+            #download )
+            #verify )
+            #extract_global )
+            #patch_global )
+            #build_global )
+            #setup_gdc64 )
+            #build_gdc64 )
+            #package_gdc64 )
+            ;;
+    
+        --shell)
+            echo "--shell: Not implemented"
+            exit 1
+            ;;
+        *|-h|--help)
+            usage
+            exit 1
+    esac
+done
+
+if [ $# -eq 0 ]; then
+  if [ ! -e state ]; then
+    echo download > state
+  fi
+  echo "No options giving.  Resuming $(cat state)"
+fi
+
+              
+# Clean stage prior to resuming.  This means patching/configuring should be merged 
 # Reorder.  Extract/patching routine.  All files must be extracted then patched.
 # Convert to git revision
 
@@ -59,20 +134,18 @@ sources=(
     "https://bitbucket.org/venix1/mingw-gdc/downloads/pthreads-w32-cvs20100527-p1.zip"
     "https://bitbucket.org/venix1/mingw-gdc/downloads/expat-2.0.1.tar.gz"
     "https://bitbucket.org/venix1/mingw-gdc/downloads/ppl-0.11.tar.gz"
-    "https://bitbucket.org/venix1/mingw-gdc/downloads/gcc-core-4.6.1.tar.bz2"   
+    "https://bitbucket.org/venix1/mingw-gdc/downloads/gcc-core-4.6.1.tar.bz2"
+	"https://bitbucket.org/venix1/mingw-gdc/downloads/gcc-g++-4.6.1.tar.bz2"
 )
 
 # URL of compiler pieces.
 compilers=(
     "http://sourceforge.net/projects/tdm-gcc/files/TDM-GCC%204.6%20series/4.6.1-tdm64-1/gcc-4.6.1-tdm64-1-core.tar.lzma"
-	"http://downloads.sourceforge.net/project/tdm-gcc/GNU%20binutils/binutils-2.22.90-tdm64-1.tar.lzma"
-#    "http://sourceforge.net/projects/tdm-gcc/files/GNU%20binutils/binutils-2.21.53-20110731-tdm64-1.tar.lzma"
+    "http://downloads.sourceforge.net/project/tdm-gcc/GNU%20binutils/binutils-2.22.90-tdm64-1.tar.lzma"    
     "http://sourceforge.net/projects/tdm-gcc/files/MinGW-w64%20runtime/GCC%204.6%20series/mingw64-runtime-tdm64-gcc46-svn4483.tar.lzma"
     "http://sourceforge.net/projects/tdm-gcc/files/TDM-GCC%204.6%20series/4.6.1-tdm64-1/gcc-4.6.1-tdm64-1-c++.tar.lzma"
-    #"http://sourceforge.net/projects/tdm-gcc/files/TDM-GCC%204.6%20series/4.6.1-tdm64-1/gcc-4.6.1-tdm64-1-openmp.tar.lzma"
     "http://sourceforge.net/projects/tdm-gcc/files/TDM-GCC%204.6%20series/4.6.1-tdm-1%20SJLJ/gcc-4.6.1-tdm-1-core.tar.lzma"
     "http://sourceforge.net/projects/tdm-gcc/files/TDM-GCC%204.6%20series/4.6.1-tdm-1%20SJLJ/gcc-4.6.1-tdm-1-c++.tar.lzma"
-#    "http://sourceforge.net/projects/tdm-gcc/files/TDM-GCC%204.5%20series/4.6.1-tdm-1%20SJLJ/gcc-4.6.1-tdm-1-openmp.tar.lzma"
     
     "http://sourceforge.net/projects/mingw/files/MinGW/Base/binutils/binutils-2.21.53/binutils-2.21.53-1-mingw32-bin.tar.lzma"
     "http://sourceforge.net/projects/mingw/files/MinGW/Base/libiconv/libiconv-1.13.1-1/libiconv-1.13.1-1-mingw32-dll-2.tar.lzma"
@@ -119,11 +192,17 @@ build_gdc()
        
        popd
        
-       CC="gcc -m32"
-       CXX="g++ -m32"
+       export CC="gcc -m32"
+       export CXX="g++ -m32"
        # --debug Disable optimizations.
        #find . -name Makefile -exec sed -i 's/-O2/-O0 -g3/g' {} \; -exec chmod 644 {} \;
-       /crossdev/gccbuilder/build-tdm64.sh gcc $ARGS 2>&1 | tee build.log
+       /crossdev/gccbuilder/build-tdm64.sh gcc $ARGS
+       
+       # Have to compile and install 32 bit libphobos due to multilib issue
+       pushd $path/build/x86_64-w64-mingw32/32/libphobos
+       make
+       make  install prefix=$path/stage
+       popd
    fi
    popd
 }
@@ -353,18 +432,17 @@ package()
 
         # D2 files
         # Multilib compiling not working.  Grab from build directory
-        # Must manujally compile that directory
-        #cp $D2/lib32/libgphobos2.a $1/release/lib32
-        #cp $D2/lib32/dmain.o $1/release/lib32/dmain.o
-        cp $D2/../build/x86_64-w64-mingw32/32/libphobos/libgphobos2.a $1/release/lib32
-        cp $D2/../build/x86_64-w64-mingw32/32/libphobos/libdruntime/libgdruntime.a $1/release/lib32
-        cp $D2/../build/x86_64-w64-mingw32/32/libphobos/libdruntime/rt/dmain.o $1/release/lib32
-        
 
         cp $D2/lib/libgphobos2.a $1/release/lib
         cp $D2/lib/libgdruntime.a $1/release/lib
         cp $D2/lib/dmain.o $1/release/lib/dmain.o
+        
+        cp $D2/lib32/libgphobos2.a $1/release/lib32
+        cp $D2/lib32/libgdruntime.a $1/release/lib32
+        cp $D2/lib32/dmain.o $1/release/lib32/dmain.o      
+        
         cp -rf $D2/include/d $1/release/include
+        
         cp $D2/libexec/gcc/$ARCH/$GCC_VER/cc1d.exe $1/release/libexec/gcc/$ARCH/$GCC_VER/
 
         # Non-unique files.
@@ -407,10 +485,11 @@ package()
     #pp gdmd
 
     #Separate Debugging Info
+    # Bug with symbol truncation causes GDB to fail to load.
     #gdc -g foo.d -o foo.exe
     #objcopy --only-keep-debug foo.exe foo.debug
     #strip -g foo.exe
-    #bjcopy --add-gnu-debuglink=foo.debug foo.exe
+    #objcopy --add-gnu-debuglink=foo.debug foo.exe
     popd
     
     cp gpl.txt              /crossdev/$1/release
@@ -424,14 +503,14 @@ package()
 # Patch source files.
 patch_global_sources()
 {
-  echo > /dev/null
+	echo > /dev/null
 }
 
-function setup_gdc_build
+setup_gdc_build()
 {
     path=/crossdev/$1
     version=`basename $path`
-
+    
     rm -rf "$path/*"
     
     # Extract GCC
@@ -526,15 +605,8 @@ function check_system {
     requires unzip
 }
 
-#handle_options
-
-
 check_system
 make_directory_layout
-
-if [ ! -e state ]; then
-    echo download > state
-fi
 
 while :
 do
@@ -564,13 +636,13 @@ case "$state" in
     verify )
         # Verify md5sums, fail.
         success=1
-		if [ ! -e md5sum ]; then
+		if [ ! -e mingw.md5sum ]; then
 		  echo -e "\033[1;31m""File md5sum does not exist. Need wget"
 		  echo -e "\033[0m""mingw-get install msys-wget"
-		  echo download > ../state;
+		  echo download > state;
 		  exit
 		fi
-        for file in $(md5sum -c md5sum | grep FAILED | cut -d: -f1); do
+        for file in $(md5sum -c mingw.md5sum | grep FAILED | cut -d: -f1); do
             echo "Checksum failure for $file. Removing $file"
             rm $file; 
             success=0
@@ -583,7 +655,7 @@ case "$state" in
             # Failed, redownload and exit.
             echo "Failed verifying file checksums.  Please try again"
             echo download > state;
-            exit 0;
+            exit 1;
         fi          
     ;;
     
@@ -613,11 +685,9 @@ case "$state" in
         echo package_gdc64 > state
     ;;
 
-        #test_compiler("gdc64/d1")
-        #test_compiler("gdc64/d2")
+    #test_compiler("gdc64/d2")
 
     package_gdc64 )
-        exit 0
         package gdc64
         echo finish > state
     ;;

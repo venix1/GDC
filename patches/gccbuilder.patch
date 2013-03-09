@@ -1,6 +1,6 @@
-diff -rup gccbuilder.original//Makefile gccbuilder//Makefile
---- gccbuilder.original//Makefile	2013-03-08 13:03:09 -0600
-+++ gccbuilder//Makefile	2013-03-08 13:04:27 -0600
+diff -rup gccbuilder.0//Makefile gccbuilder/Makefile
+--- gccbuilder.0//Makefile	2013-03-08 13:03:09 -0600
++++ gccbuilder/Makefile	2013-03-09 05:03:36 -0600
 @@ -153,8 +153,7 @@ gcc: $(GCC_BUILD)/Makefile
  	  CXXFLAGS="-mthreads -O2 -D__USE_MINGW_ACCESS" \
  	  BOOT_CXXFLAGS="-mthreads -O2 -D__USE_MINGW_ACCESS" \
@@ -32,16 +32,23 @@ diff -rup gccbuilder.original//Makefile gccbuilder//Makefile
  
  
  ###############
-@@ -420,7 +420,7 @@ gcc: $(GCC_BUILD)/Makefile
+@@ -420,27 +420,26 @@ gcc: $(GCC_BUILD)/Makefile
  	-export LPATH="$(GCC_PREFIX)/lib;$(GCC_PREFIX)/x86_64-w64-mingw32/lib" && \
  	 export LIBRARY_PATH=$(GCC_PREFIX)/lib/gcc/x86_64-w64-mingw32/4.6.1 && \
  	 export CPATH="$(GCC_PREFIX)/include;$(GCC_PREFIX)/x86_64-w64-mingw32/include" && \
 -	 $(MAKE) -C $(GCC_BUILD) bootstrap \
-+	 $(MAKE) -C $(GCC_BUILD) \
- 	  BOOT_CFLAGS="-O2 -m32" BOOT_LDFLAGS="-s -m32"
+-	  BOOT_CFLAGS="-O2 -m32" BOOT_LDFLAGS="-s -m32"
++	 $(MAKE) -C $(GCC_BUILD) 
  	test -f $(GCC_BUILD)/fixincludes/fixincl.o
  	test -n $(GCC_BUILD)/fixincludes/fixincl.exe
-@@ -434,13 +434,14 @@ $(GCC_BUILD)/Makefile:
+ 	rm -f $(GCC_BUILD)/fixincludes/*.o
+ 	$(MAKE) -C $(GCC_BUILD)/fixincludes CFLAGS="-m32" LDFLAGS="-m32"
+-	$(MAKE) -C $(GCC_BUILD) bootstrap \
+-	 BOOT_CFLAGS="-O2 -m32" BOOT_LDFLAGS="-s -m32"
++	$(MAKE) -C $(GCC_BUILD) 
+ 	$(MAKE) -C $(GCC_BUILD) install prefix=$(GCC_STAGE)
+ $(GCC_BUILD)/Makefile:
+ 	rm -fR $(GCC_BUILD)
  	mkdir -p $(GCC_BUILD)
  	cd $(GCC_BUILD) && \
  	 $(GCC_SRC)/configure --build=x86_64-w64-mingw32 --enable-targets=all \
@@ -58,10 +65,10 @@ diff -rup gccbuilder.original//Makefile gccbuilder//Makefile
  
  .PHONY: expat
  expat: $(EXPAT_BUILD)/Makefile
-Only in gccbuilder.original/: Makefile.orig
-diff -rup gccbuilder.original//build-tdm-sjlj.sh gccbuilder//build-tdm-sjlj.sh
---- gccbuilder.original//build-tdm-sjlj.sh	2013-03-08 13:03:10 -0600
-+++ gccbuilder//build-tdm-sjlj.sh	2013-03-08 13:03:17 -0600
+Only in gccbuilder.0/: Makefile.orig
+diff -rup gccbuilder.0//build-tdm-sjlj.sh gccbuilder/build-tdm-sjlj.sh
+--- gccbuilder.0//build-tdm-sjlj.sh	2013-03-08 13:03:10 -0600
++++ gccbuilder/build-tdm-sjlj.sh	2013-03-08 13:03:17 -0600
 @@ -3,7 +3,7 @@
  make -f /crossdev/gccbuilder/Makefile \
   JOBCOUNT=8 \
@@ -71,10 +78,10 @@ diff -rup gccbuilder.original//build-tdm-sjlj.sh gccbuilder//build-tdm-sjlj.sh
   GMP_SRC=/crossdev/src/gmp-4.3.2 \
   GMP_BUILD=/crossdev/build/gmp-tdm32 \
   GMP_STAGE=/crossdev/support-stage-tdm32/gmp \
-Only in gccbuilder.original/: build-tdm-sjlj.sh.orig
-diff -rup gccbuilder.original//build-tdm64.sh gccbuilder//build-tdm64.sh
---- gccbuilder.original//build-tdm64.sh	2013-03-08 13:03:11 -0600
-+++ gccbuilder//build-tdm64.sh	2013-03-08 13:04:44 -0600
+Only in gccbuilder.0/: build-tdm-sjlj.sh.orig
+diff -rup gccbuilder.0//build-tdm64.sh gccbuilder/build-tdm64.sh
+--- gccbuilder.0//build-tdm64.sh	2013-03-08 13:03:11 -0600
++++ gccbuilder/build-tdm64.sh	2013-03-08 13:04:44 -0600
 @@ -1,9 +1,8 @@
  #!/bin/sh
  
@@ -86,4 +93,4 @@ diff -rup gccbuilder.original//build-tdm64.sh gccbuilder//build-tdm64.sh
   BINUTILS_SRC=/crossdev/src/binutils-2.21.53-20110731 \
   BINUTILS_BUILD=/crossdev/build/binutils-tdm64 \
   BINUTILS_STAGE=/crossdev/binutils-stage-tdm64 \
-Only in gccbuilder.original/: build-tdm64.sh.orig
+Only in gccbuilder.0/: build-tdm64.sh.orig
