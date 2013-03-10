@@ -60,7 +60,7 @@ diff -rup gccbuilder.0//Makefile gccbuilder/Makefile
  	  --prefix=$(GCC_PREFIX) --with-local-prefix=$(GCC_PREFIX) \
  	  --with-pkgversion="tdm64-$(SUB_VER)" \
 -	  --with-bugurl="http://tdm-gcc.tdragon.net/bugs"
-+	  --with-bugurl="http://gdcproject.org/bugzilla/"
++	  --with-bugurl="http://gdcproject.org/bugzilla/" \
 +	  --disable-bootstrap
  
  .PHONY: expat
